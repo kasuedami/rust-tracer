@@ -9,8 +9,8 @@ fn main() {
     ];
 
     let position = DVec3::new(0.0, 0.0, 0.0);
-    let image = Image::from_width_aspect_ratio(800, 2.0, 256);
-    let mut camera = Camera::new(position, 0.5, image);
+    let image = Image::from_width_aspect_ratio(400, 2.0, 255);
+    let mut camera = Camera::new(position, 1.0, image);
 
     camera.render_image(&objects);
 

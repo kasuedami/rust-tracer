@@ -50,7 +50,7 @@ impl Camera {
                 let pixel_center = self.pixel00_loc + (x as f64 * self.pixel_delta_u) + (y as f64 * self.pixel_delta_v);
                 let ray_direction = pixel_center - self.position;
 
-                let ray = Ray::new(pixel_center, ray_direction);
+                let ray = Ray::new(self.position, ray_direction);
 
                 (self.ray_color(ray, &objects)
                     .clamp(
