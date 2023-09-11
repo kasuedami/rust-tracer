@@ -1,3 +1,5 @@
+use rust_tracer::*;
+
 fn main() {
-    println!("Hello, world!");
+    image_writer::write(256, 256);
 }
