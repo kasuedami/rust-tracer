@@ -1,7 +1,10 @@
 pub mod image_writer {
-    pub fn write(width: i32, height: i32) {
+    use std::{path::Path, fs::File, io::{Write, Error}};
 
-        println!("P3\n{} {}\n255", width, height);
+    pub fn write(width: i32, height: i32, path: &Path) -> Result<(), Error> {
+
+        let mut ppm_content = String::new();
+        ppm_content.push_str(&format!("P3\n{} {}\n255", width, height));
 
         for j in 0..height {
             for i in 0..width {
@@ -13,8 +16,17 @@ pub mod image_writer {
                 let int_g = (255.999 * g) as i32;
                 let int_b = (255.999 * b) as i32;
 
-                println!("{} {} {}", int_r, int_g, int_b);
+                ppm_content.push_str(&format!("{} {} {}", int_r, int_g, int_b));
             }
         }
+
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+
+        let mut file = File::create(path)?;
+        write!(file, "{}", ppm_content)?;
+
+        Ok(())
     }
 }
