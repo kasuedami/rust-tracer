@@ -4,7 +4,7 @@ use glam::DVec3;
 use indicatif::ProgressIterator;
 use itertools::Itertools;
 
-use crate::ray::Ray;
+use crate::{ray::Ray, sphere::Sphere};
 
 pub struct Camera {
     position: DVec3,
@@ -40,7 +40,7 @@ impl Camera {
         }
     }
 
-    pub fn render_image(&mut self) {
+    pub fn render_image(&mut self, objects: &[Sphere]) {
 
         let pixels = (0..self.image.height)
             .cartesian_product(0..self.image.width)
@@ -52,7 +52,7 @@ impl Camera {
 
                 let ray = Ray::new(pixel_center, ray_direction);
 
-                (self.ray_color(ray)
+                (self.ray_color(ray, &objects)
                     .clamp(
                         DVec3::splat(0.0),
                         DVec3::splat(0.999)
@@ -63,7 +63,14 @@ impl Camera {
         self.image.data = Some(pixels);
     }
 
-    fn ray_color(&self, ray: Ray) -> DVec3 {
+    fn ray_color(&self, ray: Ray, objects: &[Sphere]) -> DVec3 {
+
+        for object in objects {
+            if object.hit(&ray) {
+                return DVec3::new(1.0, 0.0, 0.0);
+            }
+        }
+
         let unit_direction = ray.direction().normalize();
         let a = 0.5 * (unit_direction.y + 1.0);
 
