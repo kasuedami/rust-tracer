@@ -9,38 +9,45 @@ use crate::ray::Ray;
 pub struct Camera {
     position: DVec3,
     focal_length: f64,
+    pixel_delta_u: DVec3,
+    pixel_delta_v: DVec3,
+    pixel00_loc: DVec3,
     image: Image,
 }
 
 impl Camera {
-    pub fn new(position: DVec3, image: Image) -> Self {
+    pub fn new(position: DVec3, focal_length: f64, image: Image) -> Self {
+
+        let viewport_height = 2.0;
+        let viewport_width = viewport_height * image.aspect_ratio();
+
+        let viewport_u = DVec3::new(viewport_width, 0.0, 0.0);
+        let viewport_v = DVec3::new(0.0, -viewport_height, 0.0);
+
+        let pixel_delta_u = viewport_u / image.width as f64;
+        let pixel_delta_v = viewport_v / image.height as f64;
+
+        let viewport_upper_left = position - DVec3::new(0.0, 0.0, focal_length) - viewport_u / 2.0 - viewport_v / 2.0;
+        let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
+
         Self {
             position,
-            focal_length: 1.0,
+            focal_length,
+            pixel_delta_u,
+            pixel_delta_v,
+            pixel00_loc,
             image,
         }
     }
 
     pub fn render_image(&mut self) {
 
-        let viewport_height = 2.0;
-        let viewport_width = viewport_height * self.image.aspect_ratio();
-
-        let viewport_u = DVec3::new(viewport_width, 0.0, 0.0);
-        let viewport_v = DVec3::new(0.0, -viewport_height, 0.0);
-
-        let pixel_delta_u = viewport_u / self.image.width as f64;
-        let pixel_delta_v = viewport_v / self.image.height as f64;
-
-        let viewport_upper_left = self.position - DVec3::new(0.0, 0.0, self.focal_length) - viewport_u / 2.0 - viewport_v / 2.0;
-        let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
-
         let pixels = (0..self.image.height)
             .cartesian_product(0..self.image.width)
             .progress_count(self.image.width as u64 * self.image.height as u64)
             .map(|(y, x)| {
 
-                let pixel_center = pixel00_loc + (x as f64 * pixel_delta_u) + (y as f64 * pixel_delta_v);
+                let pixel_center = self.pixel00_loc + (x as f64 * self.pixel_delta_u) + (y as f64 * self.pixel_delta_v);
                 let ray_direction = pixel_center - self.position;
 
                 let ray = Ray::new(pixel_center, ray_direction);
