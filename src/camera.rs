@@ -4,8 +4,11 @@ use glam::DVec3;
 use indicatif::ProgressIterator;
 use itertools::Itertools;
 
+use crate::ray::Ray;
+
 pub struct Camera {
     position: DVec3,
+    focal_length: f64,
     image: Image,
 }
 
@@ -13,31 +16,51 @@ impl Camera {
     pub fn new(position: DVec3, image: Image) -> Self {
         Self {
             position,
+            focal_length: 1.0,
             image,
         }
     }
 
     pub fn render_image(&mut self) {
+
+        let viewport_height = 2.0;
+        let viewport_width = viewport_height * self.image.aspect_ratio();
+
+        let viewport_u = DVec3::new(viewport_width, 0.0, 0.0);
+        let viewport_v = DVec3::new(0.0, -viewport_height, 0.0);
+
+        let pixel_delta_u = viewport_u / self.image.width as f64;
+        let pixel_delta_v = viewport_v / self.image.height as f64;
+
+        let viewport_upper_left = self.position - DVec3::new(0.0, 0.0, self.focal_length) - viewport_u / 2.0 - viewport_v / 2.0;
+        let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
+
         let pixels = (0..self.image.height)
             .cartesian_product(0..self.image.width)
             .progress_count(self.image.width as u64 * self.image.height as u64)
             .map(|(y, x)| {
 
-                let color = DVec3::new(
-                    x as f64 / (self.image.width - 1) as f64,
-                    y as f64 / (self.image.height - 1) as f64,
-                    0.0)
+                let pixel_center = pixel00_loc + (x as f64 * pixel_delta_u) + (y as f64 * pixel_delta_v);
+                let ray_direction = pixel_center - self.position;
+
+                let ray = Ray::new(pixel_center, ray_direction);
+
+                (self.ray_color(ray)
                     .clamp(
                         DVec3::splat(0.0),
                         DVec3::splat(0.999)
-                    ) * self.image.max_color_value as f64;
-
-                
-                color.into()
+                    ) * self.image.max_color_value as f64).into()
             })
             .collect::<Vec<Pixel>>();
 
         self.image.data = Some(pixels);
+    }
+
+    fn ray_color(&self, ray: Ray) -> DVec3 {
+        let unit_direction = ray.direction().normalize();
+        let a = 0.5 * (unit_direction.y + 1.0);
+
+        (1.0 - a) * DVec3::new(1.0, 1.0, 1.0) + a * DVec3::new(0.5, 0.7, 1.0)
     }
 
     pub fn save_image(&self, name: &str) -> Result<(), Error> {
@@ -104,8 +127,8 @@ impl Image {
         }
     }
 
-    fn aspect_ratio(&self) -> u64 {
-        self.width as u64 / self.height as u64
+    fn aspect_ratio(&self) -> f64 {
+        self.width as f64 / self.height as f64
     }
 }
 
