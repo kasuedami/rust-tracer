@@ -66,8 +66,10 @@ impl Camera {
     fn ray_color(&self, ray: Ray, objects: &[Sphere]) -> DVec3 {
 
         for object in objects {
-            if object.hit(&ray) {
-                return DVec3::new(1.0, 0.0, 0.0);
+            let t = object.hit(&ray);
+            if t > 0.0 {
+                let n = (ray.at(t) - DVec3::new(0.0, 0.0, -1.0)).normalize();
+                return 0.5 * (n + 1.0);
             }
         }
 
