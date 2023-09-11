@@ -1,10 +1,14 @@
 pub mod image_writer {
     use std::{path::Path, fs::File, io::{Write, Error}};
 
-    pub fn write(width: i32, height: i32, path: &Path) -> Result<(), Error> {
+    use indicatif::ProgressBar;
+
+    pub fn write(width: u32, height: u32, path: &Path) -> Result<(), Error> {
 
         let mut ppm_content = String::new();
         ppm_content.push_str(&format!("P3\n{} {}\n255", width, height));
+
+        let bar = ProgressBar::new(width as u64 * height as u64);
 
         for j in 0..height {
             for i in 0..width {
@@ -17,8 +21,11 @@ pub mod image_writer {
                 let int_b = (255.999 * b) as i32;
 
                 ppm_content.push_str(&format!("{} {} {}", int_r, int_g, int_b));
+                bar.inc(1);
             }
         }
+
+        bar.finish();
 
         if let Some(parent) = path.parent() {
             std::fs::create_dir_all(parent)?;
