@@ -1,3 +1,5 @@
+pub(crate) mod ray;
+
 const COLOR_RESOLUTION: u32 = 255;
 
 pub mod image_writer {
