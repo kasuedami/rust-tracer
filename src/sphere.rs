@@ -1,5 +1,7 @@
+use std::ops::Range;
+
 use glam::DVec3;
-use crate::ray::Ray;
+use crate::{ray::Ray, hittable::{Hittable, HitRecord}};
 
 pub struct Sphere {
     position: DVec3,
@@ -13,18 +15,40 @@ impl Sphere {
             radius,
         }
     }
+}
 
-    pub(crate) fn hit(&self, ray: &Ray) -> f64 {
+impl Hittable for Sphere {
+    fn hit(&self, ray: Ray, t_range: Range<f64>) -> Option<HitRecord> {
         let oc = ray.orign() - self.position;
         let a = ray.direction().length_squared();
         let half_b = oc.dot(ray.direction());
         let c = oc.length_squared() - self.radius * self.radius;
+
         let discriminant = half_b * half_b - a * c;
 
         if discriminant < 0.0 {
-            -1.0
+            None
         } else {
-            (-half_b - discriminant.sqrt()) / a
+            let sqrtd = discriminant.sqrt();
+            let mut root = (-half_b - sqrtd) / a;
+
+            if !t_range.contains(&root) {
+                root = (-half_b + sqrtd) / a;
+
+                if !t_range.contains(&root) {
+                    return None;
+                }
+            }
+
+            let point = ray.at(root);
+
+            Some(HitRecord::new(
+                point,
+                (point - self.position) / self.radius,
+                root
+            ))
         }
+
+
     }
 }
