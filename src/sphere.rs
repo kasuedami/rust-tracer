@@ -27,28 +27,28 @@ impl Hittable for Sphere {
         let discriminant = half_b * half_b - a * c;
 
         if discriminant < 0.0 {
-            None
-        } else {
-            let sqrtd = discriminant.sqrt();
-            let mut root = (-half_b - sqrtd) / a;
-
-            if !t_range.contains(&root) {
-                root = (-half_b + sqrtd) / a;
-
-                if !t_range.contains(&root) {
-                    return None;
-                }
-            }
-
-            let point = ray.at(root);
-
-            Some(HitRecord::new(
-                point,
-                (point - self.position) / self.radius,
-                root
-            ))
+            return None;
         }
 
+        let sqrtd = discriminant.sqrt();
+        let mut root = (-half_b - sqrtd) / a;
 
+        if !t_range.contains(&root) {
+            root = (-half_b + sqrtd) / a;
+
+            if !t_range.contains(&root) {
+                return None;
+            }
+        }
+
+        let point = ray.at(root);
+        let outward_normal = (point - self.position) / self.radius;
+
+        Some(HitRecord::new(
+            ray,
+            point,
+            outward_normal,
+            root
+        ))
     }
 }
