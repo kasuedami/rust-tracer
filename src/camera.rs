@@ -5,7 +5,7 @@ use indicatif::ProgressIterator;
 use itertools::Itertools;
 use rand::Rng;
 
-use crate::{ray::Ray, world::World};
+use crate::{ray::Ray, world::World, material::util::random_unit_vector};
 
 pub struct Camera {
     position: DVec3,
@@ -13,11 +13,12 @@ pub struct Camera {
     pixel_delta_v: DVec3,
     pixel00_loc: DVec3,
     samples_per_pixel: u32,
+    max_depth: u32,
     image: Image,
 }
 
 impl Camera {
-    pub fn new(position: DVec3, focal_length: f64, samples_per_pixel: u32, image: Image) -> Self {
+    pub fn new(position: DVec3, focal_length: f64, samples_per_pixel: u32, max_depth: u32, image: Image) -> Self {
 
         let viewport_height = 2.0;
         let viewport_width = viewport_height * image.aspect_ratio();
@@ -37,6 +38,7 @@ impl Camera {
             pixel_delta_v,
             pixel00_loc,
             samples_per_pixel,
+            max_depth,
             image,
         }
     }
@@ -52,34 +54,31 @@ impl Camera {
 
                 for _ in 0..self.samples_per_pixel {
                     let ray = self.get_ray(x, y);
-                    color += self.ray_color(ray, world);
+                    color += self.ray_color(ray, self.max_depth, world);
                 }
 
-                ((color * (1.0 / self.samples_per_pixel as f64)).clamp(
+                let normalized = color * (1.0 / self.samples_per_pixel as f64);
+                let gamma = Self::linear_to_gamma(normalized);
+
+                (gamma.clamp(
                     DVec3::splat(0.0),
                     DVec3::splat(0.999)
                 ) * self.image.max_color_value as f64).into()
-
-                // let pixel_center = self.pixel00_loc + (x as f64 * self.pixel_delta_u) + (y as f64 * self.pixel_delta_v);
-                // let ray_direction = pixel_center - self.position;
-
-                // let ray = Ray::new(self.position, ray_direction);
-
-                // (self.ray_color(ray, &world)
-                //     .clamp(
-                //         DVec3::splat(0.0),
-                //         DVec3::splat(0.999)
-                //     ) * self.image.max_color_value as f64).into()
             })
             .collect::<Vec<Pixel>>();
 
         self.image.data = Some(pixels);
     }
 
-    fn ray_color(&self, ray: Ray, world: &World) -> DVec3 {
+    fn ray_color(&self, ray: Ray, depth: u32, world: &World) -> DVec3 {
 
-        if let Some(hit) = world.hit(ray, 0.0..f64::INFINITY) {
-            return 0.5 * (hit.normal() + 1.0);
+        if depth == 0 {
+            return DVec3::ZERO;
+        }
+
+        if let Some(hit) = world.hit(ray, 0.001..f64::INFINITY) {
+            let direction = hit.normal() + random_unit_vector();
+            return 0.5 * self.ray_color(Ray::new(hit.point(), direction), depth - 1, world);
         }
 
         let unit_direction = ray.direction().normalize();
@@ -103,6 +102,14 @@ impl Camera {
         let py = -0.5 + rand::thread_rng().gen_range(0.0..1.0);
         
         (px * self.pixel_delta_u) + (py * self.pixel_delta_v)
+    }
+
+    fn linear_to_gamma(color: DVec3) -> DVec3 {
+        DVec3::new(
+            color.x.sqrt(),
+            color.y.sqrt(),
+            color.z.sqrt()
+        )
     }
 
     pub fn save_image(&self, name: &str) -> Result<(), Error> {
