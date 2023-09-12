@@ -2,6 +2,7 @@ use glam::DVec3;
 
 use crate::{ray::Ray, hittable::HitRecord};
 
+pub mod dialectric;
 pub mod lambertian;
 pub mod metal;
 pub mod util;
