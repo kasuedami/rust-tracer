@@ -8,7 +8,6 @@ use crate::{ray::Ray, world::World};
 
 pub struct Camera {
     position: DVec3,
-    focal_length: f64,
     pixel_delta_u: DVec3,
     pixel_delta_v: DVec3,
     pixel00_loc: DVec3,
@@ -32,7 +31,6 @@ impl Camera {
 
         Self {
             position,
-            focal_length,
             pixel_delta_u,
             pixel_delta_v,
             pixel00_loc,
