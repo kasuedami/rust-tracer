@@ -2,7 +2,7 @@ use glam::DVec3;
 
 use crate::{ray::Ray, hittable::HitRecord};
 
-use super::{Material, Scattered, reflect::reflect, util::random_unit_vector};
+use super::{Material, Scattered, util::reflect, util::random_unit_vector};
 
 pub struct Metal {
     albedo: DVec3,
