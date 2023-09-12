@@ -1,27 +1,29 @@
-use std::ops::Range;
+use std::{ops::Range, rc::Rc};
 
 use glam::DVec3;
-use crate::{ray::Ray, hittable::{Hittable, HitRecord}};
+use crate::{ray::Ray, hittable::{Hittable, HitRecord}, material::Material};
 
 pub struct Sphere {
     position: DVec3,
     radius: f64,
+    material: Rc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(position: DVec3, radius: f64) -> Self {
+    pub fn new(position: DVec3, radius: f64, material: Rc<dyn Material>) -> Self {
         Self {
             position,
             radius,
+            material,
         }
     }
 }
 
 impl Hittable for Sphere {
     fn hit(&self, ray: Ray, t_range: Range<f64>) -> Option<HitRecord> {
-        let oc = ray.orign() - self.position;
-        let a = ray.direction().length_squared();
-        let half_b = oc.dot(ray.direction());
+        let oc = ray.origin - self.position;
+        let a = ray.direction.length_squared();
+        let half_b = oc.dot(ray.direction);
         let c = oc.length_squared() - self.radius * self.radius;
 
         let discriminant = half_b * half_b - a * c;
@@ -48,7 +50,8 @@ impl Hittable for Sphere {
             ray,
             point,
             outward_normal,
-            root
+            root,
+            self.material.clone()
         ))
     }
 }

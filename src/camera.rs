@@ -5,7 +5,7 @@ use indicatif::ProgressIterator;
 use itertools::Itertools;
 use rand::Rng;
 
-use crate::{ray::Ray, world::World, material::util::random_unit_vector};
+use crate::{ray::Ray, world::World};
 
 pub struct Camera {
     position: DVec3,
@@ -77,11 +77,15 @@ impl Camera {
         }
 
         if let Some(hit) = world.hit(ray, 0.001..f64::INFINITY) {
-            let direction = hit.normal() + random_unit_vector();
-            return 0.5 * self.ray_color(Ray::new(hit.point(), direction), depth - 1, world);
+
+            if let Some(scattered) = hit.material.clone().scatter(ray, hit) {
+                return scattered.attenuation * self.ray_color(scattered.direction, depth - 1, &world);
+            } else {
+                return DVec3::ZERO;
+            }
         }
 
-        let unit_direction = ray.direction().normalize();
+        let unit_direction = ray.direction.normalize();
         let a = 0.5 * (unit_direction.y + 1.0);
 
         (1.0 - a) * DVec3::new(1.0, 1.0, 1.0) + a * DVec3::new(0.5, 0.7, 1.0)

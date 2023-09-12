@@ -18,7 +18,7 @@ impl World {
 
         for object in &self.objects {
             if let Some(hit) = object.hit(ray, t_range.start..closest_so_far) {
-                closest_so_far = hit.t();
+                closest_so_far = hit.t;
 
                 closest_hit = Some(hit);
             }

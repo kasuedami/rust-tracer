@@ -1,4 +1,19 @@
+use glam::DVec3;
 
+use crate::{ray::Ray, hittable::HitRecord};
+
+pub mod lambertian;
+pub mod metal;
+pub mod reflect;
+
+pub trait Material {
+    fn scatter(&self, ray: Ray, hit_record: HitRecord) -> Option<Scattered>;
+}
+
+pub struct Scattered {
+    pub attenuation: DVec3,
+    pub direction: Ray,
+}
 
 pub mod util {
     use glam::DVec3;
