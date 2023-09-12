@@ -2,7 +2,7 @@ use glam::DVec3;
 
 use crate::{ray::Ray, hittable::HitRecord, material::util::refract};
 
-use super::{Material, Scattered};
+use super::{Material, Scattered, util::reflect};
 
 pub struct Dialectric {
     refraction_index: f64,
@@ -16,15 +16,25 @@ impl Dialectric {
 
 impl Material for Dialectric {
     fn scatter(&self, ray: Ray, hit_record: HitRecord) -> Option<Scattered> {
-        let attenuation = DVec3::ONE;
+        let attenuation = DVec3::splat(1.0);
         let refraction_ratio = if hit_record.front_face {
-            1.0 / self.refraction_index
+            self.refraction_index.recip()
         } else {
             self.refraction_index
         };
 
         let unit_direction = ray.direction.normalize();
-        let refracted = refract(unit_direction, hit_record.normal, refraction_ratio);
+        let cos_theta = (-unit_direction.dot(hit_record.normal)).min(1.0);
+        let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+
+        let cannot_refract = refraction_ratio * sin_theta > 1.0;
+
+        let refracted = if cannot_refract {
+            reflect(unit_direction, hit_record.normal)
+        } else {
+            refract(unit_direction, hit_record.normal, refraction_ratio)
+        };
+
         let direction = Ray::new(hit_record.point, refracted);
 
         Some(Scattered { attenuation, direction })
