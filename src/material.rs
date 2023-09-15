@@ -1,6 +1,6 @@
 use glam::DVec3;
 
-use crate::{ray::Ray, hittable::HitRecord};
+use crate::{hittable::HitRecord, ray::Ray};
 
 pub mod dialectric;
 pub mod lambertian;

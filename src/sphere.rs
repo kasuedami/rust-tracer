@@ -1,7 +1,11 @@
 use std::{ops::Range, rc::Rc};
 
+use crate::{
+    hittable::{HitRecord, Hittable},
+    material::Material,
+    ray::Ray,
+};
 use glam::DVec3;
-use crate::{ray::Ray, hittable::{Hittable, HitRecord}, material::Material};
 
 pub struct Sphere {
     position: DVec3,
@@ -51,7 +55,7 @@ impl Hittable for Sphere {
             point,
             outward_normal,
             root,
-            self.material.clone()
+            self.material.clone(),
         ))
     }
 }

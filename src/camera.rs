@@ -1,4 +1,8 @@
-use std::{io::{Error, Write}, path::PathBuf, fs::{self, File}};
+use std::{
+    fs::{self, File},
+    io::{Error, Write},
+    path::PathBuf,
+};
 
 use glam::DVec3;
 use indicatif::ProgressIterator;
@@ -18,9 +22,18 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(position: DVec3, focal_length: f64, samples_per_pixel: u32, max_depth: u32, image: Image) -> Self {
+    pub fn new(
+        position: DVec3,
+        focal_length: f64,
+        fov: f64,
+        samples_per_pixel: u32,
+        max_depth: u32,
+        image: Image,
+    ) -> Self {
+        let theta = fov.to_radians();
+        let h = (theta / 2.0).tan();
 
-        let viewport_height = 2.0;
+        let viewport_height = 2.0 * h * focal_length;
         let viewport_width = viewport_height * image.aspect_ratio();
 
         let viewport_u = DVec3::new(viewport_width, 0.0, 0.0);
@@ -29,7 +42,8 @@ impl Camera {
         let pixel_delta_u = viewport_u / image.width as f64;
         let pixel_delta_v = viewport_v / image.height as f64;
 
-        let viewport_upper_left = position - DVec3::new(0.0, 0.0, focal_length) - viewport_u / 2.0 - viewport_v / 2.0;
+        let viewport_upper_left =
+            position - DVec3::new(0.0, 0.0, focal_length) - viewport_u / 2.0 - viewport_v / 2.0;
         let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 
         Self {
@@ -44,12 +58,10 @@ impl Camera {
     }
 
     pub fn render_image(&mut self, world: &World) {
-
         let pixels = (0..self.image.height)
             .cartesian_product(0..self.image.width)
             .progress_count(self.image.width as u64 * self.image.height as u64)
             .map(|(y, x)| {
-
                 let mut color = DVec3::ZERO;
 
                 for _ in 0..self.samples_per_pixel {
@@ -60,10 +72,9 @@ impl Camera {
                 let normalized = color * (1.0 / self.samples_per_pixel as f64);
                 let gamma = Self::linear_to_gamma(normalized);
 
-                (gamma.clamp(
-                    DVec3::splat(0.0),
-                    DVec3::splat(0.999)
-                ) * self.image.max_color_value as f64).into()
+                (gamma.clamp(DVec3::splat(0.0), DVec3::splat(0.999))
+                    * self.image.max_color_value as f64)
+                    .into()
             })
             .collect::<Vec<Pixel>>();
 
@@ -71,15 +82,14 @@ impl Camera {
     }
 
     fn ray_color(&self, ray: Ray, depth: u32, world: &World) -> DVec3 {
-
         if depth == 0 {
             return DVec3::ZERO;
         }
 
         if let Some(hit) = world.hit(ray, 0.001..f64::INFINITY) {
-
             if let Some(scattered) = hit.material.clone().scatter(ray, hit) {
-                return scattered.attenuation * self.ray_color(scattered.direction, depth - 1, &world);
+                return scattered.attenuation
+                    * self.ray_color(scattered.direction, depth - 1, &world);
             } else {
                 return DVec3::ZERO;
             }
@@ -92,7 +102,8 @@ impl Camera {
     }
 
     fn get_ray(&self, x: u32, y: u32) -> Ray {
-        let pixel_center = self.pixel00_loc + (x as f64 * self.pixel_delta_u) + (y as f64 * self.pixel_delta_v);
+        let pixel_center =
+            self.pixel00_loc + (x as f64 * self.pixel_delta_u) + (y as f64 * self.pixel_delta_v);
         let pixel_sample = pixel_center + self.pixel_sample_square();
 
         let ray_origin = self.position;
@@ -104,31 +115,21 @@ impl Camera {
     fn pixel_sample_square(&self) -> DVec3 {
         let px = -0.5 + rand::thread_rng().gen_range(0.0..1.0);
         let py = -0.5 + rand::thread_rng().gen_range(0.0..1.0);
-        
+
         (px * self.pixel_delta_u) + (py * self.pixel_delta_v)
     }
 
     fn linear_to_gamma(color: DVec3) -> DVec3 {
-        DVec3::new(
-            color.x.sqrt(),
-            color.y.sqrt(),
-            color.z.sqrt()
-        )
+        DVec3::new(color.x.sqrt(), color.y.sqrt(), color.z.sqrt())
     }
 
     pub fn save_image(&self, name: &str) -> Result<(), Error> {
-
         let pixels = if let Some(pixels) = &self.image.data {
-            pixels.iter().map(|pixel| {
-                format!(
-                    "{} {} {}",
-                    pixel.r,
-                    pixel.g,
-                    pixel.b
-                )
-            })
-            .collect::<Vec<String>>()
-            .join("\n")
+            pixels
+                .iter()
+                .map(|pixel| format!("{} {} {}", pixel.r, pixel.g, pixel.b))
+                .collect::<Vec<String>>()
+                .join("\n")
         } else {
             todo!();
         };
@@ -144,13 +145,11 @@ impl Camera {
         write!(
             file,
             "{}",
-            format!("P3\n{} {}\n{}\n{}\n",
-                    self.image.width,
-                    self.image.height,
-                    self.image.max_color_value,
-                    pixels
-                )
+            format!(
+                "P3\n{} {}\n{}\n{}\n",
+                self.image.width, self.image.height, self.image.max_color_value, pixels
             )
+        )
     }
 }
 

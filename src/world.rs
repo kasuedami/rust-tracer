@@ -1,6 +1,9 @@
 use std::ops::Range;
 
-use crate::{hittable::{Hittable, HitRecord}, ray::Ray};
+use crate::{
+    hittable::{HitRecord, Hittable},
+    ray::Ray,
+};
 
 pub struct World {
     objects: Vec<Box<dyn Hittable>>,
@@ -12,7 +15,6 @@ impl World {
     }
 
     pub fn hit(&self, ray: Ray, t_range: Range<f64>) -> Option<HitRecord> {
-
         let mut closest_hit = None;
         let mut closest_so_far = t_range.end;
 

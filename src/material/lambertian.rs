@@ -2,7 +2,7 @@ use glam::DVec3;
 
 use crate::{hittable::HitRecord, ray::Ray};
 
-use super::{Material, Scattered, util::random_unit_vector};
+use super::{util::random_unit_vector, Material, Scattered};
 
 pub struct Lambertian {
     albedo: DVec3,
@@ -25,6 +25,9 @@ impl Material for Lambertian {
         let direction = Ray::new(hit_record.point, scatter_direction);
         let attenuation = self.albedo;
 
-        Some(Scattered { attenuation, direction })
+        Some(Scattered {
+            attenuation,
+            direction,
+        })
     }
 }
