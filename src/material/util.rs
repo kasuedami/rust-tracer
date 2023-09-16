@@ -16,6 +16,17 @@ pub fn random_in_unit_sphere() -> DVec3 {
     }
 }
 
+fn random_in_unit_disk() -> DVec3 {
+    let mut rand_thread = rand::thread_rng();
+
+    loop {
+        let p = DVec3::new(rand_thread.gen_range(-1.0..1.0), rand_thread.gen_range(-1.0..1.0), 0.0);
+        if p.length_squared() < 1.0 {
+            return p;
+        }
+    }
+}
+
 pub fn random_unit_vector() -> DVec3 {
     return random_in_unit_sphere().normalize();
 }

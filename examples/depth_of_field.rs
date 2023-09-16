@@ -45,11 +45,11 @@ fn main() {
     let look_at = DVec3::new(0.0, 0.0, -1.0);
 
     let image = Image::from_width_aspect_ratio(400, 16.0 / 9.0, 255);
-    let mut camera = Camera::new(position, look_at, DVec3::Y, 90.0, 10.0, 3.4, 100, 50, image);
+    let mut camera = Camera::new(position, look_at, DVec3::Y, 20.0, 10.0, 3.4, 100, 50, image);
 
     camera.render_image(&world);
 
-    match camera.save_image("image") {
+    match camera.save_image("depth_of_field") {
         Ok(_) => println!("Image saved successfully!"),
         Err(_) => println!("Failed to save the image!"),
     }

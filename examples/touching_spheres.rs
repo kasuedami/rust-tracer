@@ -25,9 +25,10 @@ fn main() {
 
     let position = DVec3::new(0.0, 0.0, 0.0);
     let look_at = DVec3::new(0.0, 0.0, -1.0);
+    let distance = position.distance(look_at);
 
     let image = Image::from_width_aspect_ratio(400, 16.0 / 9.0, 255);
-    let mut camera = Camera::new(position, look_at, DVec3::Y, 90.0, 100, 50, image);
+    let mut camera = Camera::new(position, look_at, DVec3::Y, 90.0, 0.0, distance, 100, 50, image);
 
     camera.render_image(&world);
 

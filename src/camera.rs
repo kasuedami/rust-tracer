@@ -9,12 +9,15 @@ use indicatif::ProgressIterator;
 use itertools::Itertools;
 use rand::Rng;
 
-use crate::{ray::Ray, world::World};
+use crate::{ray::Ray, world::World, material::util::random_in_unit_sphere};
 
 pub struct Camera {
     position: DVec3,
     pixel_delta_u: DVec3,
     pixel_delta_v: DVec3,
+    defocus_angle: f64,
+    defocus_disk_u: DVec3,
+    defocus_disk_v: DVec3,
     pixel00_loc: DVec3,
     samples_per_pixel: u32,
     max_depth: u32,
@@ -27,13 +30,14 @@ impl Camera {
         look_at: DVec3,
         up: DVec3,
         fov: f64,
+        defocus_angle: f64,
+        focus_dist: f64,
         samples_per_pixel: u32,
         max_depth: u32,
         image: Image,
     ) -> Self {
 
         let position = look_from;
-        let focal_length = (look_from - look_at).length();
         let w = (look_from - look_at).normalize();
         let u = up.cross(w).normalize();
         let v = w.cross(u);
@@ -41,7 +45,7 @@ impl Camera {
         let theta = fov.to_radians();
         let h = (theta / 2.0).tan();
 
-        let viewport_height = 2.0 * h * focal_length;
+        let viewport_height = 2.0 * h * focus_dist;
         let viewport_width = viewport_height * image.aspect_ratio();
 
         let viewport_u = viewport_width * u;
@@ -51,13 +55,20 @@ impl Camera {
         let pixel_delta_v = viewport_v / image.height as f64;
 
         let viewport_upper_left =
-            position - (focal_length * w) - viewport_u / 2.0 - viewport_v / 2.0;
+            position - (focus_dist * w) - viewport_u / 2.0 - viewport_v / 2.0;
         let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
+
+        let defocus_radius = focus_dist * (defocus_angle / 2.0).to_radians().tan();
+        let defocus_disk_u = u * defocus_radius;
+        let defocus_disk_v = v * defocus_radius;
 
         Self {
             position,
             pixel_delta_u,
             pixel_delta_v,
+            defocus_angle,
+            defocus_disk_u,
+            defocus_disk_v,
             pixel00_loc,
             samples_per_pixel,
             max_depth,
@@ -114,7 +125,12 @@ impl Camera {
             self.pixel00_loc + (x as f64 * self.pixel_delta_u) + (y as f64 * self.pixel_delta_v);
         let pixel_sample = pixel_center + self.pixel_sample_square();
 
-        let ray_origin = self.position;
+        let ray_origin = if self.defocus_angle <= 0.0 {
+            self.position
+        } else {
+            self.defocus_disk_sample()
+        };
+
         let ray_direction = pixel_sample - ray_origin;
 
         Ray::new(ray_origin, ray_direction)
@@ -129,6 +145,12 @@ impl Camera {
 
     fn linear_to_gamma(color: DVec3) -> DVec3 {
         DVec3::new(color.x.sqrt(), color.y.sqrt(), color.z.sqrt())
+    }
+
+    fn defocus_disk_sample(&self) -> DVec3 {
+        let p = random_in_unit_sphere();
+        
+        self.position + (p.x * self.defocus_disk_u) + (p.y * self.defocus_disk_v)
     }
 
     pub fn save_image(&self, name: &str) -> Result<(), Error> {
