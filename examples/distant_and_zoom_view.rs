@@ -44,12 +44,22 @@ fn main() {
     let position = DVec3::new(-2.0, 2.0, 1.0);
     let look_at = DVec3::new(0.0, 0.0, -1.0);
 
-    let image = Image::from_width_aspect_ratio(400, 16.0 / 9.0, 255);
-    let mut camera = Camera::new(position, look_at, DVec3::Y, 90.0, 100, 50, image);
+    let distant_image = Image::from_width_aspect_ratio(400, 16.0 / 9.0, 255);
+    let zoom_image = Image::from_width_aspect_ratio(400, 16.0 / 9.0, 255);
+    
+    let mut distant_camera = Camera::new(position, look_at, DVec3::Y, 90.0, 100, 50, distant_image);
+    let mut zoom_camera = Camera::new(position, look_at, DVec3::Y, 20.0, 100, 50, zoom_image);
 
-    camera.render_image(&world);
+    distant_camera.render_image(&world);
 
-    match camera.save_image("image") {
+    match distant_camera.save_image("distant_view") {
+        Ok(_) => println!("Image saved successfully!"),
+        Err(_) => println!("Failed to save the image!"),
+    }
+
+    zoom_camera.render_image(&world);
+
+    match zoom_camera.save_image("zoom_view") {
         Ok(_) => println!("Image saved successfully!"),
         Err(_) => println!("Failed to save the image!"),
     }
