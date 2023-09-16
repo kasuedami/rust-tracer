@@ -9,7 +9,7 @@ use indicatif::ProgressIterator;
 use itertools::Itertools;
 use rand::Rng;
 
-use crate::{ray::Ray, world::World, material::util::random_in_unit_sphere};
+use crate::{material::util::random_in_unit_disk, ray::Ray, world::World};
 
 pub struct Camera {
     position: DVec3,
@@ -25,7 +25,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new( 
+    pub fn new(
         look_from: DVec3,
         look_at: DVec3,
         up: DVec3,
@@ -36,7 +36,6 @@ impl Camera {
         max_depth: u32,
         image: Image,
     ) -> Self {
-
         let position = look_from;
         let w = (look_from - look_at).normalize();
         let u = up.cross(w).normalize();
@@ -54,8 +53,7 @@ impl Camera {
         let pixel_delta_u = viewport_u / image.width as f64;
         let pixel_delta_v = viewport_v / image.height as f64;
 
-        let viewport_upper_left =
-            position - (focus_dist * w) - viewport_u / 2.0 - viewport_v / 2.0;
+        let viewport_upper_left = position - (focus_dist * w) - viewport_u / 2.0 - viewport_v / 2.0;
         let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 
         let defocus_radius = focus_dist * (defocus_angle / 2.0).to_radians().tan();
@@ -148,8 +146,8 @@ impl Camera {
     }
 
     fn defocus_disk_sample(&self) -> DVec3 {
-        let p = random_in_unit_sphere();
-        
+        let p = random_in_unit_disk();
+
         self.position + (p.x * self.defocus_disk_u) + (p.y * self.defocus_disk_v)
     }
 

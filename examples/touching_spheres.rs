@@ -1,4 +1,4 @@
-use std::{rc::Rc, f64::consts::PI};
+use std::{f64::consts::PI, rc::Rc};
 
 use glam::DVec3;
 use rust_tracer::{
@@ -10,7 +10,6 @@ use rust_tracer::{
 };
 
 fn main() {
-
     let r = (PI / 4.0).cos();
 
     let material_left = Rc::new(Lambertian::new(DVec3::new(0.0, 0.0, 1.0)));
@@ -18,7 +17,7 @@ fn main() {
 
     let objects: Vec<Box<dyn Hittable>> = vec![
         Box::new(Sphere::new(DVec3::new(-r, 0.0, -1.0), r, material_left)),
-        Box::new(Sphere::new(DVec3::new( r, 0.0, -1.0), r, material_right)),
+        Box::new(Sphere::new(DVec3::new(r, 0.0, -1.0), r, material_right)),
     ];
 
     let world = World::new(objects);
@@ -28,7 +27,17 @@ fn main() {
     let distance = position.distance(look_at);
 
     let image = Image::from_width_aspect_ratio(400, 16.0 / 9.0, 255);
-    let mut camera = Camera::new(position, look_at, DVec3::Y, 90.0, 0.0, distance, 100, 50, image);
+    let mut camera = Camera::new(
+        position,
+        look_at,
+        DVec3::Y,
+        90.0,
+        0.0,
+        distance,
+        100,
+        50,
+        image,
+    );
 
     camera.render_image(&world);
 
