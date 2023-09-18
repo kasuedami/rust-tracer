@@ -11,7 +11,7 @@ pub struct Metal {
 
 impl Metal {
     pub fn new(albedo: DVec3, fuzz: f64) -> Self {
-        let fuzz = if fuzz >= 0.0 && fuzz < 1.0 { fuzz } else { 1.0 };
+        let fuzz = if (0.0..1.0).contains(&fuzz) { fuzz } else { 1.0 };
 
         Self { albedo, fuzz }
     }

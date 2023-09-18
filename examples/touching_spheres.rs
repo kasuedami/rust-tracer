@@ -1,4 +1,4 @@
-use std::{f64::consts::PI, rc::Rc};
+use std::{f64::consts::PI, sync::Arc};
 
 use glam::DVec3;
 use rust_tracer::{
@@ -12,10 +12,10 @@ use rust_tracer::{
 fn main() {
     let r = (PI / 4.0).cos();
 
-    let material_left = Rc::new(Lambertian::new(DVec3::new(0.0, 0.0, 1.0)));
-    let material_right = Rc::new(Lambertian::new(DVec3::new(1.0, 0.0, 0.0)));
+    let material_left = Arc::new(Lambertian::new(DVec3::new(0.0, 0.0, 1.0)));
+    let material_right = Arc::new(Lambertian::new(DVec3::new(1.0, 0.0, 0.0)));
 
-    let objects: Vec<Box<dyn Hittable>> = vec![
+    let objects: Vec<Box<dyn Hittable + Send + Sync>> = vec![
         Box::new(Sphere::new(DVec3::new(-r, 0.0, -1.0), r, material_left)),
         Box::new(Sphere::new(DVec3::new(r, 0.0, -1.0), r, material_right)),
     ];

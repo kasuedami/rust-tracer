@@ -5,9 +5,10 @@ use std::{
 };
 
 use glam::DVec3;
-use indicatif::ProgressIterator;
+use indicatif::ParallelProgressIterator;
 use itertools::Itertools;
 use rand::Rng;
+use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
 use crate::{material::util::random_in_unit_disk, ray::Ray, world::World};
 
@@ -77,6 +78,8 @@ impl Camera {
     pub fn render_image(&mut self, world: &World) {
         let pixels = (0..self.image.height)
             .cartesian_product(0..self.image.width)
+            .collect::<Vec<(u32, u32)>>()
+            .into_par_iter()
             .progress_count(self.image.width as u64 * self.image.height as u64)
             .map(|(y, x)| {
                 let mut color = DVec3::ZERO;
@@ -106,7 +109,7 @@ impl Camera {
         if let Some(hit) = world.hit(ray, 0.001..f64::INFINITY) {
             if let Some(scattered) = hit.material.clone().scatter(ray, hit) {
                 return scattered.attenuation
-                    * self.ray_color(scattered.direction, depth - 1, &world);
+                    * self.ray_color(scattered.direction, depth - 1, world);
             } else {
                 return DVec3::ZERO;
             }
@@ -168,15 +171,15 @@ impl Camera {
             fs::create_dir_all(parent)?;
         }
 
+        let output = format!(
+            "P3\n{} {}\n{}\n{}\n",
+            self.image.width, self.image.height, self.image.max_color_value, pixels
+        );
         let mut file = File::create(path)?;
 
         write!(
             file,
-            "{}",
-            format!(
-                "P3\n{} {}\n{}\n{}\n",
-                self.image.width, self.image.height, self.image.max_color_value, pixels
-            )
+            "{output}"
         )
     }
 }

@@ -1,4 +1,4 @@
-use std::{ops::Range, rc::Rc};
+use std::{ops::Range, sync::Arc};
 
 use crate::{
     hittable::{HitRecord, Hittable},
@@ -10,11 +10,11 @@ use glam::DVec3;
 pub struct Sphere {
     position: DVec3,
     radius: f64,
-    material: Rc<dyn Material>,
+    material: Arc<dyn Material + Sync + Send>,
 }
 
 impl Sphere {
-    pub fn new(position: DVec3, radius: f64, material: Rc<dyn Material>) -> Self {
+    pub fn new(position: DVec3, radius: f64, material: Arc<dyn Material + Send + Sync>) -> Self {
         Self {
             position,
             radius,

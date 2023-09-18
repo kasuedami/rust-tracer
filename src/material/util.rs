@@ -32,7 +32,7 @@ pub fn random_in_unit_disk() -> DVec3 {
 }
 
 pub fn random_unit_vector() -> DVec3 {
-    return random_in_unit_sphere().normalize();
+    random_in_unit_sphere().normalize()
 }
 
 pub fn random_on_hemisphere(normal: DVec3) -> DVec3 {
@@ -46,7 +46,7 @@ pub fn random_on_hemisphere(normal: DVec3) -> DVec3 {
 }
 
 pub fn reflect(v: DVec3, n: DVec3) -> DVec3 {
-    return v - 2. * v.dot(n) * n;
+    v - 2. * v.dot(n) * n
 }
 
 pub fn refract(uv: DVec3, n: DVec3, etai_over_etat: f64) -> DVec3 {

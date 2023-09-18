@@ -1,4 +1,4 @@
-use std::{ops::Range, rc::Rc};
+use std::{ops::Range, sync::Arc};
 
 use glam::DVec3;
 
@@ -13,7 +13,7 @@ pub struct HitRecord {
     pub point: DVec3,
     pub normal: DVec3,
     pub t: f64,
-    pub material: Rc<dyn Material>,
+    pub material: Arc<dyn Material>,
     pub front_face: bool,
 }
 
@@ -23,7 +23,7 @@ impl HitRecord {
         point: DVec3,
         outward_normal: DVec3,
         t: f64,
-        material: Rc<dyn Material>,
+        material: Arc<dyn Material>,
     ) -> Self {
         let front_face = ray.direction.dot(outward_normal) < 0.0;
         let normal = if front_face {

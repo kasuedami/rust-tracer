@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use glam::DVec3;
 use rust_tracer::{
@@ -10,12 +10,12 @@ use rust_tracer::{
 };
 
 fn main() {
-    let material_ground = Rc::new(Lambertian::new(DVec3::new(0.8, 0.8, 0.0)));
-    let material_center = Rc::new(Lambertian::new(DVec3::new(0.1, 0.2, 0.5)));
-    let material_left = Rc::new(Dialectric::new(1.5));
-    let material_right = Rc::new(Metal::new(DVec3::new(0.8, 0.6, 0.2), 0.0));
+    let material_ground = Arc::new(Lambertian::new(DVec3::new(0.8, 0.8, 0.0)));
+    let material_center = Arc::new(Lambertian::new(DVec3::new(0.1, 0.2, 0.5)));
+    let material_left = Arc::new(Dialectric::new(1.5));
+    let material_right = Arc::new(Metal::new(DVec3::new(0.8, 0.6, 0.2), 0.0));
 
-    let objects: Vec<Box<dyn Hittable>> = vec![
+    let objects: Vec<Box<dyn Hittable + Send + Sync>> = vec![
         Box::new(Sphere::new(
             DVec3::new(0.0, -100.5, -1.0),
             100.0,
