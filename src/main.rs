@@ -21,8 +21,9 @@ fn main() {
             100.0,
             material_ground,
         )),
-        Box::new(Sphere::stationary(
+        Box::new(Sphere::moving(
             DVec3::new(0.0, 0.0, -1.0),
+            DVec3::new(0.0, 1.0, 0.0),
             0.5,
             material_center,
         )),

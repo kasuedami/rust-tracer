@@ -9,7 +9,7 @@ use glam::DVec3;
 
 pub struct Sphere {
     start_position: DVec3,
-    end_position: DVec3,
+    direction: DVec3,
     moving: bool,
     radius: f64,
     material: Arc<dyn Material + Sync + Send>,
@@ -23,7 +23,7 @@ impl Sphere {
     ) -> Self {
         Self {
             start_position: position,
-            end_position: position,
+            direction: DVec3::ZERO,
             moving: false,
             radius,
             material,
@@ -32,13 +32,13 @@ impl Sphere {
 
     pub fn moving(
         start_position: DVec3,
-        end_position: DVec3,
+        direction: DVec3,
         radius: f64,
         material: Arc<dyn Material + Send + Sync>,
     ) -> Self {
         Self {
             start_position,
-            end_position,
+            direction,
             moving: true,
             radius,
             material,
@@ -46,7 +46,7 @@ impl Sphere {
     }
 
     fn current_position(&self, time: f64) -> DVec3 {
-        self.start_position + self.end_position * time
+        self.start_position + self.direction * time
     }
 }
 

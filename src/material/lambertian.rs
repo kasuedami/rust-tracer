@@ -15,14 +15,14 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, _ray: Ray, hit_record: HitRecord) -> Option<Scattered> {
+    fn scatter(&self, ray: Ray, hit_record: HitRecord) -> Option<Scattered> {
         let mut scatter_direction = hit_record.normal + random_unit_vector();
 
         if scatter_direction.abs_diff_eq(DVec3::ZERO, 1e-8) {
             scatter_direction = hit_record.normal;
         }
 
-        let direction = Ray::new(hit_record.point, scatter_direction);
+        let direction = Ray::new_with_time(hit_record.point, scatter_direction, ray.time);
         let attenuation = self.albedo;
 
         Some(Scattered {
