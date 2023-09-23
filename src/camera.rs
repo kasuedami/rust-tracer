@@ -12,8 +12,10 @@ use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
 use crate::{material::util::random_in_unit_disk, ray::Ray, world::World};
 
+pub mod builder;
+
 pub struct Camera {
-    position: DVec3,
+    look_from: DVec3,
     pixel_delta_u: DVec3,
     pixel_delta_v: DVec3,
     defocus_angle: f64,
@@ -37,7 +39,6 @@ impl Camera {
         max_depth: u32,
         image: Image,
     ) -> Self {
-        let position = look_from;
         let w = (look_from - look_at).normalize();
         let u = up.cross(w).normalize();
         let v = w.cross(u);
@@ -54,7 +55,7 @@ impl Camera {
         let pixel_delta_u = viewport_u / image.width as f64;
         let pixel_delta_v = viewport_v / image.height as f64;
 
-        let viewport_upper_left = position - (focus_dist * w) - viewport_u / 2.0 - viewport_v / 2.0;
+        let viewport_upper_left = look_from - (focus_dist * w) - viewport_u / 2.0 - viewport_v / 2.0;
         let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 
         let defocus_radius = focus_dist * (defocus_angle / 2.0).to_radians().tan();
@@ -62,7 +63,7 @@ impl Camera {
         let defocus_disk_v = v * defocus_radius;
 
         Self {
-            position,
+            look_from: look_from,
             pixel_delta_u,
             pixel_delta_v,
             defocus_angle,
@@ -127,7 +128,7 @@ impl Camera {
         let pixel_sample = pixel_center + self.pixel_sample_square();
 
         let ray_origin = if self.defocus_angle <= 0.0 {
-            self.position
+            self.look_from
         } else {
             self.defocus_disk_sample()
         };
@@ -151,7 +152,7 @@ impl Camera {
     fn defocus_disk_sample(&self) -> DVec3 {
         let p = random_in_unit_disk();
 
-        self.position + (p.x * self.defocus_disk_u) + (p.y * self.defocus_disk_v)
+        self.look_from + (p.x * self.defocus_disk_u) + (p.y * self.defocus_disk_v)
     }
 
     pub fn save_image(&self, name: &str) -> Result<(), Error> {
@@ -177,10 +178,7 @@ impl Camera {
         );
         let mut file = File::create(path)?;
 
-        write!(
-            file,
-            "{output}"
-        )
+        write!(file, "{output}")
     }
 }
 

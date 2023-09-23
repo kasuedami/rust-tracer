@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use glam::DVec3;
 use rust_tracer::{
-    camera::{Camera, Image},
+    camera::{Image, builder::CameraBuilder},
     hittable::Hittable,
     material::{dialectric::Dialectric, lambertian::Lambertian, metal::Metal},
     sphere::Sphere,
@@ -41,35 +41,27 @@ fn main() {
 
     let world = World::new(objects);
 
-    let position = DVec3::new(-2.0, 2.0, 1.0);
+    let look_from = DVec3::new(-2.0, 2.0, 1.0);
     let look_at = DVec3::new(0.0, 0.0, -1.0);
-    let distance = position.distance(look_at);
-
+    let focus_dist = look_from.distance(look_at);
     let distant_image = Image::from_width_aspect_ratio(400, 16.0 / 9.0, 255);
     let zoom_image = Image::from_width_aspect_ratio(400, 16.0 / 9.0, 255);
 
-    let mut distant_camera = Camera::new(
-        position,
-        look_at,
-        DVec3::Y,
-        90.0,
-        0.0,
-        distance,
-        100,
-        50,
-        distant_image,
-    );
-    let mut zoom_camera = Camera::new(
-        position,
-        look_at,
-        DVec3::Y,
-        20.0,
-        0.0,
-        distance,
-        100,
-        50,
-        zoom_image,
-    );
+    let mut distant_camera = CameraBuilder::default()
+        .look_from(look_from)
+        .look_at(look_at)
+        .fov(90.0)
+        .focus_dist(focus_dist)
+        .image(distant_image)
+        .build();
+
+    let mut zoom_camera = CameraBuilder::default()
+        .look_from(look_from)
+        .look_at(look_at)
+        .fov(20.0)
+        .focus_dist(focus_dist)
+        .image(zoom_image)
+        .build();
 
     distant_camera.render_image(&world);
 

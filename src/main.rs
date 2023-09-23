@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use glam::DVec3;
 use rust_tracer::{
-    camera::{Camera, Image},
+    camera::{Image, builder::CameraBuilder},
     hittable::Hittable,
     material::{dialectric::Dialectric, lambertian::Lambertian, metal::Metal},
     sphere::Sphere,
@@ -41,11 +41,17 @@ fn main() {
 
     let world = World::new(objects);
 
-    let position = DVec3::new(-2.0, 2.0, 1.0);
+    let look_from = DVec3::new(-2.0, 2.0, 1.0);
     let look_at = DVec3::new(0.0, 0.0, -1.0);
-
     let image = Image::from_width_aspect_ratio(400, 16.0 / 9.0, 255);
-    let mut camera = Camera::new(position, look_at, DVec3::Y, 90.0, 10.0, 3.4, 100, 50, image);
+
+    let mut camera = CameraBuilder::default()
+        .look_from(look_from)
+        .look_at(look_at)
+        .defocus_angle(10.0)
+        .focus_dist(3.4)
+        .image(image)
+        .build();
 
     camera.render_image(&world);
 
