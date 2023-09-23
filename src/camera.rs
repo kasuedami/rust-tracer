@@ -55,7 +55,8 @@ impl Camera {
         let pixel_delta_u = viewport_u / image.width as f64;
         let pixel_delta_v = viewport_v / image.height as f64;
 
-        let viewport_upper_left = look_from - (focus_dist * w) - viewport_u / 2.0 - viewport_v / 2.0;
+        let viewport_upper_left =
+            look_from - (focus_dist * w) - viewport_u / 2.0 - viewport_v / 2.0;
         let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 
         let defocus_radius = focus_dist * (defocus_angle / 2.0).to_radians().tan();
@@ -134,8 +135,9 @@ impl Camera {
         };
 
         let ray_direction = pixel_sample - ray_origin;
+        let ray_time = rand::thread_rng().gen_range(0.0..1.0);
 
-        Ray::new(ray_origin, ray_direction)
+        Ray::new_with_time(ray_origin, ray_direction, ray_time)
     }
 
     fn pixel_sample_square(&self) -> DVec3 {

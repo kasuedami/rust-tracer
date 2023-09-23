@@ -2,7 +2,7 @@ use std::{f64::consts::PI, sync::Arc};
 
 use glam::DVec3;
 use rust_tracer::{
-    camera::{Image, builder::CameraBuilder},
+    camera::{builder::CameraBuilder, Image},
     hittable::Hittable,
     material::lambertian::Lambertian,
     sphere::Sphere,
@@ -16,8 +16,16 @@ fn main() {
     let material_right = Arc::new(Lambertian::new(DVec3::new(1.0, 0.0, 0.0)));
 
     let objects: Vec<Box<dyn Hittable + Send + Sync>> = vec![
-        Box::new(Sphere::new(DVec3::new(-r, 0.0, -1.0), r, material_left)),
-        Box::new(Sphere::new(DVec3::new(r, 0.0, -1.0), r, material_right)),
+        Box::new(Sphere::stationary(
+            DVec3::new(-r, 0.0, -1.0),
+            r,
+            material_left,
+        )),
+        Box::new(Sphere::stationary(
+            DVec3::new(r, 0.0, -1.0),
+            r,
+            material_right,
+        )),
     ];
 
     let world = World::new(objects);
@@ -26,7 +34,7 @@ fn main() {
     let look_at = DVec3::new(0.0, 0.0, -1.0);
     let focus_dist = look_from.distance(look_at);
     let image = Image::from_width_aspect_ratio(400, 16.0 / 9.0, 255);
- 
+
     let mut camera = CameraBuilder::default()
         .look_from(look_from)
         .look_at(look_at)

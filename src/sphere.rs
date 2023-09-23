@@ -8,24 +8,57 @@ use crate::{
 use glam::DVec3;
 
 pub struct Sphere {
-    position: DVec3,
+    start_position: DVec3,
+    end_position: DVec3,
+    moving: bool,
     radius: f64,
     material: Arc<dyn Material + Sync + Send>,
 }
 
 impl Sphere {
-    pub fn new(position: DVec3, radius: f64, material: Arc<dyn Material + Send + Sync>) -> Self {
+    pub fn stationary(
+        position: DVec3,
+        radius: f64,
+        material: Arc<dyn Material + Send + Sync>,
+    ) -> Self {
         Self {
-            position,
+            start_position: position,
+            end_position: position,
+            moving: false,
             radius,
             material,
         }
+    }
+
+    pub fn moving(
+        start_position: DVec3,
+        end_position: DVec3,
+        radius: f64,
+        material: Arc<dyn Material + Send + Sync>,
+    ) -> Self {
+        Self {
+            start_position,
+            end_position,
+            moving: true,
+            radius,
+            material,
+        }
+    }
+
+    fn current_position(&self, time: f64) -> DVec3 {
+        self.start_position + self.end_position * time
     }
 }
 
 impl Hittable for Sphere {
     fn hit(&self, ray: Ray, t_range: Range<f64>) -> Option<HitRecord> {
-        let oc = ray.origin - self.position;
+        let position = if self.moving {
+            self.current_position(ray.time)
+        } else {
+            self.start_position
+        };
+
+        let oc = ray.origin - position;
         let a = ray.direction.length_squared();
         let half_b = oc.dot(ray.direction);
         let c = oc.length_squared() - self.radius * self.radius;
@@ -48,7 +81,7 @@ impl Hittable for Sphere {
         }
 
         let point = ray.at(root);
-        let outward_normal = (point - self.position) / self.radius;
+        let outward_normal = (point - position) / self.radius;
 
         Some(HitRecord::new(
             ray,

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use glam::DVec3;
 use rust_tracer::{
-    camera::{Image, builder::CameraBuilder},
+    camera::{builder::CameraBuilder, Image},
     hittable::Hittable,
     material::{dialectric::Dialectric, lambertian::Lambertian, metal::Metal},
     sphere::Sphere,
@@ -16,27 +16,31 @@ fn main() {
     let material_right = Arc::new(Metal::new(DVec3::new(0.8, 0.6, 0.2), 0.0));
 
     let objects: Vec<Box<dyn Hittable + Send + Sync>> = vec![
-        Box::new(Sphere::new(
+        Box::new(Sphere::stationary(
             DVec3::new(0.0, -100.5, -1.0),
             100.0,
             material_ground,
         )),
-        Box::new(Sphere::new(
+        Box::new(Sphere::stationary(
             DVec3::new(0.0, 0.0, -1.0),
             0.5,
             material_center,
         )),
-        Box::new(Sphere::new(
+        Box::new(Sphere::stationary(
             DVec3::new(-1.0, 0.0, -1.0),
             0.5,
             material_left.clone(),
         )),
-        Box::new(Sphere::new(
+        Box::new(Sphere::stationary(
             DVec3::new(-1.0, 0.0, -1.0),
             -0.4,
             material_left,
         )),
-        Box::new(Sphere::new(DVec3::new(1.0, 0.0, -1.0), 0.5, material_right)),
+        Box::new(Sphere::stationary(
+            DVec3::new(1.0, 0.0, -1.0),
+            0.5,
+            material_right,
+        )),
     ];
 
     let world = World::new(objects);

@@ -31,7 +31,6 @@ impl Default for CameraBuilder {
 }
 
 impl CameraBuilder {
-
     pub fn look_from(mut self, look_from: DVec3) -> Self {
         self.look_from = look_from;
         self
