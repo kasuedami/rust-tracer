@@ -51,7 +51,7 @@ fn main() {
         .image(image)
         .build();
 
-    camera.render_image(&world);
+    camera.render_image_with_progress(&world);
 
     match camera.save_image("image") {
         Ok(_) => println!("Image saved successfully!"),

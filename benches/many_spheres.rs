@@ -1,10 +1,9 @@
 use std::sync::Arc;
 
 use rand::Rng;
+use rust_tracer::{prelude::*, material::util::random_unit_vector};
 
-use rust_tracer::{material::util::random_unit_vector, prelude::*};
-
-fn main() {
+pub fn create_world() -> World {
     let material_ground = Arc::new(Lambertian::new(DVec3::new(0.5, 0.5, 0.5)));
     let material_dielectric = Arc::new(Dielectric::new(1.5));
     let material_lambertian = Arc::new(Lambertian::new(DVec3::new(0.4, 0.2, 0.1)));
@@ -69,8 +68,10 @@ fn main() {
         }
     }
 
-    let world = World::new(objects);
+    World::new(objects)
+}
 
+pub fn create_camera(world: &World) {
     let look_from = DVec3::new(13.0, 2.0, 3.0);
     let image = Image::from_width_aspect_ratio(400, 16.0 / 9.0, 255);
 
@@ -82,10 +83,5 @@ fn main() {
         .image(image)
         .build();
 
-    camera.render_image_with_progress(&world);
-
-    match camera.save_image("many_spheres") {
-        Ok(_) => println!("Image saved successfully!"),
-        Err(_) => println!("Failed to save the image!"),
-    }
+    camera.render_image(world)
 }

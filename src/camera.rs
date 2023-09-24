@@ -82,25 +82,37 @@ impl Camera {
             .cartesian_product(0..self.image.width)
             .collect::<Vec<(u32, u32)>>()
             .into_par_iter()
-            .progress_count(self.image.width as u64 * self.image.height as u64)
-            .map(|(y, x)| {
-                let mut color = DVec3::ZERO;
-
-                for _ in 0..self.samples_per_pixel {
-                    let ray = self.get_ray(x, y);
-                    color += self.ray_color(ray, self.max_depth, world);
-                }
-
-                let normalized = color * (1.0 / self.samples_per_pixel as f64);
-                let gamma = Self::linear_to_gamma(normalized);
-
-                (gamma.clamp(DVec3::splat(0.0), DVec3::splat(0.999))
-                    * self.image.max_color_value as f64)
-                    .into()
-            })
+            .map(|(y, x)| self.render_pixel((x, y), world))
             .collect::<Vec<Pixel>>();
 
         self.image.data = Some(pixels);
+    }
+
+    pub fn render_image_with_progress(&mut self, world: &World) {
+        let pixels = (0..self.image.height)
+            .cartesian_product(0..self.image.width)
+            .collect::<Vec<(u32, u32)>>()
+            .into_par_iter()
+            .progress_count(self.image.width as u64 * self.image.height as u64)
+            .map(|(y, x)| self.render_pixel((x, y), world))
+            .collect::<Vec<Pixel>>();
+
+        self.image.data = Some(pixels);
+    }
+
+    fn render_pixel(&self, (x, y): (u32, u32), world: &World) -> Pixel {
+        let mut color = DVec3::ZERO;
+
+        for _ in 0..self.samples_per_pixel {
+            let ray = self.get_ray(x, y);
+            color += self.ray_color(ray, self.max_depth, world);
+        }
+
+        let normalized = color * (1.0 / self.samples_per_pixel as f64);
+        let gamma = Self::linear_to_gamma(normalized);
+
+        (gamma.clamp(DVec3::splat(0.0), DVec3::splat(0.999)) * self.image.max_color_value as f64)
+            .into()
     }
 
     fn ray_color(&self, ray: Ray, depth: u32, world: &World) -> DVec3 {
