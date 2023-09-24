@@ -1,20 +1,12 @@
 use std::sync::Arc;
 
-use glam::DVec3;
 use rand::Rng;
-use rust_tracer::{
-    camera::{builder::CameraBuilder, Image},
-    hittable::Hittable,
-    material::{
-        dialectric::Dialectric, lambertian::Lambertian, metal::Metal, util::random_unit_vector,
-    },
-    sphere::Sphere,
-    world::World,
-};
+
+use rust_tracer::{material::util::random_unit_vector, prelude::*};
 
 fn main() {
     let material_ground = Arc::new(Lambertian::new(DVec3::new(0.5, 0.5, 0.5)));
-    let material_dielectric = Arc::new(Dialectric::new(1.5));
+    let material_dielectric = Arc::new(Dielectric::new(1.5));
     let material_lambertian = Arc::new(Lambertian::new(DVec3::new(0.4, 0.2, 0.1)));
     let material_metal = Arc::new(Metal::new(DVec3::new(0.7, 0.6, 0.5), 0.0));
 

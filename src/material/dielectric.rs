@@ -4,17 +4,17 @@ use crate::{hittable::HitRecord, material::util::refract, ray::Ray};
 
 use super::{util::reflect, Material, Scattered};
 
-pub struct Dialectric {
+pub struct Dielectric {
     refraction_index: f64,
 }
 
-impl Dialectric {
+impl Dielectric {
     pub fn new(refraction_index: f64) -> Self {
         Self { refraction_index }
     }
 }
 
-impl Material for Dialectric {
+impl Material for Dielectric {
     fn scatter(&self, ray: Ray, hit_record: HitRecord) -> Option<Scattered> {
         let attenuation = DVec3::splat(1.0);
         let refraction_ratio = if hit_record.front_face {

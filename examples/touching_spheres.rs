@@ -1,13 +1,6 @@
 use std::{f64::consts::PI, sync::Arc};
 
-use glam::DVec3;
-use rust_tracer::{
-    camera::{builder::CameraBuilder, Image},
-    hittable::Hittable,
-    material::lambertian::Lambertian,
-    sphere::Sphere,
-    world::World,
-};
+use rust_tracer::prelude::*;
 
 fn main() {
     let r = (PI / 4.0).cos();
