@@ -69,7 +69,7 @@ fn main() {
         }
     }
 
-    let world = World::new(objects);
+    let world = HittableList::new(objects);
 
     let look_from = DVec3::new(13.0, 2.0, 3.0);
     let image = Image::from_width_aspect_ratio(400, 16.0 / 9.0, 255);

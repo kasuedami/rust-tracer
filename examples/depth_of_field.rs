@@ -36,7 +36,7 @@ fn main() {
         )),
     ];
 
-    let world = World::new(objects);
+    let world = HittableList::new(objects);
 
     let look_from = DVec3::new(-2.0, 2.0, 1.0);
     let look_at = DVec3::new(0.0, 0.0, -1.0);

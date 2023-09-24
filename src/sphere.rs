@@ -1,7 +1,7 @@
 use std::{ops::Range, sync::Arc};
 
 use crate::{
-    hittable::{HitRecord, Hittable},
+    hittable::{AxisAlignedBoundingBox, HitRecord, Hittable},
     material::Material,
     ray::Ray,
 };
@@ -12,6 +12,7 @@ pub struct Sphere {
     direction: DVec3,
     moving: bool,
     radius: f64,
+    bounding_box: AxisAlignedBoundingBox,
     material: Arc<dyn Material + Sync + Send>,
 }
 
@@ -26,6 +27,10 @@ impl Sphere {
             direction: DVec3::ZERO,
             moving: false,
             radius,
+            bounding_box: AxisAlignedBoundingBox::from_corners(
+                position - radius,
+                position + radius,
+            ),
             material,
         }
     }
@@ -36,11 +41,19 @@ impl Sphere {
         radius: f64,
         material: Arc<dyn Material + Send + Sync>,
     ) -> Self {
+        let box0 =
+            AxisAlignedBoundingBox::from_corners(start_position - radius, start_position + radius);
+        let box1 = AxisAlignedBoundingBox::from_corners(
+            (start_position + direction) - radius,
+            (start_position + direction) + radius,
+        );
+
         Self {
             start_position,
             direction,
             moving: true,
             radius,
+            bounding_box: AxisAlignedBoundingBox::from_boxes(box0, box1),
             material,
         }
     }
@@ -90,5 +103,9 @@ impl Hittable for Sphere {
             root,
             self.material.clone(),
         ))
+    }
+
+    fn bounding_box(&self) -> &AxisAlignedBoundingBox {
+        &self.bounding_box
     }
 }
