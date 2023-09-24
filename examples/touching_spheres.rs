@@ -15,7 +15,7 @@ fn main() {
     let material_left = Arc::new(Lambertian::new(DVec3::new(0.0, 0.0, 1.0)));
     let material_right = Arc::new(Lambertian::new(DVec3::new(1.0, 0.0, 0.0)));
 
-    let objects: Vec<Box<dyn Hittable + Send + Sync>> = vec![
+    let objects: Vec<Box<dyn Hittable>> = vec![
         Box::new(Sphere::stationary(
             DVec3::new(-r, 0.0, -1.0),
             r,

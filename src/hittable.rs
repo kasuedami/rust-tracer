@@ -4,7 +4,7 @@ use glam::DVec3;
 
 use crate::{material::Material, ray::Ray};
 
-pub trait Hittable {
+pub trait Hittable: Send + Sync {
     fn hit(&self, ray: Ray, t_range: Range<f64>) -> Option<HitRecord>;
 }
 

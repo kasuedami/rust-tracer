@@ -6,11 +6,11 @@ use crate::{
 };
 
 pub struct World {
-    objects: Vec<Box<dyn Hittable + Sync + Send>>,
+    objects: Vec<Box<dyn Hittable>>,
 }
 
 impl World {
-    pub fn new(objects: Vec<Box<dyn Hittable + Sync + Send>>) -> Self {
+    pub fn new(objects: Vec<Box<dyn Hittable>>) -> Self {
         Self { objects }
     }
 
