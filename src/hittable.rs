@@ -1,8 +1,8 @@
-use std::{ops::Range, sync::Arc};
+use std::{cmp::Ordering, ops::Range, sync::Arc};
 
 use glam::DVec3;
 
-use crate::{material::Material, ray::Ray, bounding_volume::BoundingVolumeHierarchyNode};
+use crate::{material::Material, ray::Ray};
 
 use self::util::combined;
 
@@ -76,8 +76,19 @@ impl AxisAlignedBoundingBox {
         }
     }
 
-    pub fn hit(&self, ray: Ray, mut t_range: Range<f64>) -> bool {
+    pub fn compare_x(box0: &Self, box1: &Self) -> Ordering {
+        box0.x.start.total_cmp(&box1.x.start)
+    }
 
+    pub fn compare_y(box0: &Self, box1: &Self) -> Ordering {
+        box0.y.start.total_cmp(&box1.y.start)
+    }
+
+    pub fn compare_z(box0: &Self, box1: &Self) -> Ordering {
+        box0.z.start.total_cmp(&box1.z.start)
+    }
+
+    pub fn hit(&self, ray: Ray, mut t_range: Range<f64>) -> bool {
         let (t0, t1) = Self::calculate_t0_t1(&self.x, ray.origin.x, ray.direction.x);
 
         t_range.start = t0.max(t_range.start);

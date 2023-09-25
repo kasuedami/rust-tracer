@@ -33,4 +33,10 @@ criterion_group! {
     targets = benchmark_fov, benchmark_many_spheres
 }
 
+criterion_group! {
+    name = many_spheres;
+    config = bench_settings();
+    targets = benchmark_many_spheres
+}
+
 criterion_main!(benches);

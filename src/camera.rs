@@ -92,7 +92,7 @@ impl Camera {
         self.image.data = Some(pixels);
     }
 
-    pub fn render_image_with_progress(&mut self, world: &HittableList) {
+    pub fn render_image_with_progress(&mut self, world: &dyn Hittable) {
         let pixels = (0..self.image.height)
             .cartesian_product(0..self.image.width)
             .collect::<Vec<(u32, u32)>>()
@@ -104,7 +104,7 @@ impl Camera {
         self.image.data = Some(pixels);
     }
 
-    fn render_pixel(&self, (x, y): (u32, u32), world: &HittableList) -> Pixel {
+    fn render_pixel(&self, (x, y): (u32, u32), world: &dyn Hittable) -> Pixel {
         let mut color = DVec3::ZERO;
 
         for _ in 0..self.samples_per_pixel {
@@ -119,7 +119,7 @@ impl Camera {
             .into()
     }
 
-    fn ray_color(&self, ray: Ray, depth: u32, world: &HittableList) -> DVec3 {
+    fn ray_color(&self, ray: Ray, depth: u32, world: &dyn Hittable) -> DVec3 {
         if depth == 0 {
             return DVec3::ZERO;
         }

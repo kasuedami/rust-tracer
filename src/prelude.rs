@@ -4,6 +4,7 @@ pub use crate::{
     hittable::HittableList,
     material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal},
     sphere::Sphere,
+    bounding_volume,
 };
 
 pub use glam::DVec3;

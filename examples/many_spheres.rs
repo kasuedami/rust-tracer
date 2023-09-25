@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use rand::Rng;
 
-use rust_tracer::{material::util::random_unit_vector, prelude::*};
+use rust_tracer::{material::util::random_unit_vector, prelude::*, bounding_volume::BoundingVolumeHierarchyNode};
 
 fn main() {
     let material_ground = Arc::new(Lambertian::new(DVec3::new(0.5, 0.5, 0.5)));
@@ -69,7 +69,8 @@ fn main() {
         }
     }
 
-    let world = HittableList::new(objects);
+    // let world = HittableList::new(objects);
+    let world = BoundingVolumeHierarchyNode::new(objects);
 
     let look_from = DVec3::new(13.0, 2.0, 3.0);
     let image = Image::from_width_aspect_ratio(400, 16.0 / 9.0, 255);
