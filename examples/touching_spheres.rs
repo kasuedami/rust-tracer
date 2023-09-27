@@ -1,6 +1,6 @@
 use std::{f64::consts::PI, sync::Arc};
 
-use rust_tracer::prelude::*;
+use rust_tracer::{prelude::*, bounding_volume::BoundingVolumeHierarchyNode};
 
 fn main() {
     let r = (PI / 4.0).cos();
@@ -21,7 +21,7 @@ fn main() {
         )),
     ];
 
-    let world = HittableList::new(objects);
+    let world = BoundingVolumeHierarchyNode::new(objects);
 
     let look_from = DVec3::new(0.0, 0.0, 0.0);
     let look_at = DVec3::new(0.0, 0.0, -1.0);

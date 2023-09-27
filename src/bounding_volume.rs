@@ -7,6 +7,7 @@ use crate::{
     ray::Ray,
 };
 
+#[derive(Debug)]
 pub struct BoundingVolumeHierarchyNode {
     left: Option<Box<dyn Hittable>>,
     right: Option<Box<dyn Hittable>>,
@@ -57,18 +58,22 @@ impl BoundingVolumeHierarchyNode {
             let middle_index = objects.len() / 2;
 
             let right_objects = objects.split_off(middle_index);
-            let left_objects = objects;
+            let mut left_objects = objects;
 
-            let left_bounding_volume = Self::new(left_objects);
-            let right_bounding_volume = Self::new(right_objects);
+            let left_bounding_volume = if left_objects.len() == 1 {
+                left_objects.remove(0)
+            } else {
+                Box::new(Self::new(left_objects))
+            };
+            let right_bounding_volume = Box::new(Self::new(right_objects));
             let bounding_box = AxisAlignedBoundingBox::from_boxes(
-                left_bounding_volume.bounding_box.clone(),
+                left_bounding_volume.bounding_box().clone(),
                 right_bounding_volume.bounding_box.clone(),
             );
 
             Self {
-                left: Some(Box::new(left_bounding_volume)),
-                right: Some(Box::new(right_bounding_volume)),
+                left: Some(left_bounding_volume),
+                right: Some(right_bounding_volume),
                 bounding_box,
             }
         }
@@ -85,7 +90,7 @@ impl From<HittableList> for BoundingVolumeHierarchyNode {
 
 impl Hittable for BoundingVolumeHierarchyNode {
     fn hit(&self, ray: Ray, t_range: Range<f64>) -> Option<HitRecord> {
-        if self.bounding_box.hit(ray, t_range.clone()) {
+        if !self.bounding_box.hit(ray, t_range.clone()) {
             return None;
         }
 
@@ -105,11 +110,23 @@ impl Hittable for BoundingVolumeHierarchyNode {
             None
         };
 
-        if hit_right.is_some() {
-            hit_right
-        } else {
-            hit_left
+        match (hit_right, hit_left) {
+            (Some(right), Some(left)) => {
+                if right.t < left.t {
+                    Some(right)
+                } else {
+                    Some(left)
+                }
+            },
+            (Some(right), None) => {
+                Some(right)
+            },
+            (None, Some(left)) => {
+                Some(left)
+            },
+            _ => None
         }
+
     }
 
     fn bounding_box(&self) -> &AxisAlignedBoundingBox {

@@ -7,6 +7,7 @@ use crate::{
 };
 use glam::DVec3;
 
+#[derive(Debug)]
 pub struct Sphere {
     start_position: DVec3,
     direction: DVec3,

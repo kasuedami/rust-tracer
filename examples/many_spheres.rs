@@ -2,7 +2,9 @@ use std::sync::Arc;
 
 use rand::Rng;
 
-use rust_tracer::{material::util::random_unit_vector, prelude::*, bounding_volume::BoundingVolumeHierarchyNode};
+use rust_tracer::{
+    bounding_volume::BoundingVolumeHierarchyNode, material::util::random_unit_vector, prelude::*,
+};
 
 fn main() {
     let material_ground = Arc::new(Lambertian::new(DVec3::new(0.5, 0.5, 0.5)));
@@ -69,7 +71,6 @@ fn main() {
         }
     }
 
-    // let world = HittableList::new(objects);
     let world = BoundingVolumeHierarchyNode::new(objects);
 
     let look_from = DVec3::new(13.0, 2.0, 3.0);

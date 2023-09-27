@@ -11,7 +11,7 @@ use rand::Rng;
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
 use crate::{
-    hittable::{Hittable, HittableList},
+    hittable::Hittable,
     material::util::random_in_unit_disk,
     ray::Ray,
 };
@@ -81,7 +81,7 @@ impl Camera {
         }
     }
 
-    pub fn render_image(&mut self, world: &HittableList) {
+    pub fn render_image(&mut self, world: &dyn Hittable) {
         let pixels = (0..self.image.height)
             .cartesian_product(0..self.image.width)
             .collect::<Vec<(u32, u32)>>()

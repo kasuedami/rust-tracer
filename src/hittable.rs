@@ -1,12 +1,10 @@
-use std::{cmp::Ordering, ops::Range, sync::Arc};
+use std::{cmp::Ordering, ops::Range, sync::Arc, fmt::Debug};
 
 use glam::DVec3;
 
 use crate::{material::Material, ray::Ray};
 
-use self::util::combined;
-
-pub trait Hittable: Send + Sync {
+pub trait Hittable: Send + Sync + Debug {
     fn hit(&self, ray: Ray, t_range: Range<f64>) -> Option<HitRecord>;
 
     fn bounding_box(&self) -> &AxisAlignedBoundingBox;
@@ -46,7 +44,7 @@ impl HitRecord {
     }
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct AxisAlignedBoundingBox {
     x: Range<f64>,
     y: Range<f64>,
@@ -127,6 +125,7 @@ impl AxisAlignedBoundingBox {
     }
 }
 
+#[derive(Debug)]
 pub struct HittableList {
     objects: Vec<Box<dyn Hittable>>,
     bounding_box: AxisAlignedBoundingBox,
@@ -177,15 +176,69 @@ impl Hittable for HittableList {
     }
 }
 
-mod util {
-    use std::ops::Range;
+#[allow(dead_code)]
+fn expand(delta: f64, range: Range<f64>) -> Range<f64> {
+    let padding = delta / 2.0;
+    (range.start - padding)..(range.end + padding)
+}
 
-    pub fn expand(delta: f64, range: Range<f64>) -> Range<f64> {
-        let padding = delta / 2.0;
-        (range.start - padding)..(range.end + padding)
-    }
+fn combined(range0: Range<f64>, range1: Range<f64>) -> Range<f64> {
+    range0.start.min(range1.start)..(range0.end.max(range1.end))
+}
 
-    pub fn combined(range0: Range<f64>, range1: Range<f64>) -> Range<f64> {
-        range0.start.min(range1.start)..(range1.end.max(range1.end))
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn axis_aligned_bounding_box() {
+        let test_range = 0.0..f64::INFINITY;
+
+        let ray_should_hit = Ray::new(DVec3::NEG_ONE, DVec3::ONE);
+        let ray_should_not_hit = Ray::new(DVec3::NEG_ONE, DVec3::NEG_ONE);
+        let normal_constructor = AxisAlignedBoundingBox::new(0.0..2.0, 0.0..2.0, 0.0..2.0);
+
+        assert!(normal_constructor.hit(ray_should_hit, test_range.clone()));
+        assert!(!normal_constructor.hit(ray_should_not_hit, test_range.clone()));
+
+        let min_corner = DVec3::ZERO;
+        let max_corner = DVec3::splat(2.0);
+        let from_corners_simple = AxisAlignedBoundingBox::from_corners(min_corner, max_corner);
+
+        assert_eq!(from_corners_simple.x, 0.0..2.0);
+        assert_eq!(from_corners_simple.y, 0.0..2.0);
+        assert_eq!(from_corners_simple.z, 0.0..2.0);
+
+        assert!(from_corners_simple.hit(ray_should_hit, test_range.clone()));
+        assert!(!from_corners_simple.hit(ray_should_not_hit, test_range.clone()));
+
+        let corner0 = DVec3::new(0.0, 2.0, 0.0);
+        let corner1 = DVec3::new(2.0, 0.0, 2.0);
+        let from_corners_complex = AxisAlignedBoundingBox::from_corners(corner0, corner1);
+
+        assert_eq!(from_corners_complex.x, 0.0..2.0);
+        assert_eq!(from_corners_complex.y, 0.0..2.0);
+        assert_eq!(from_corners_complex.z, 0.0..2.0);
+
+        assert!(from_corners_complex.hit(ray_should_hit, test_range.clone()));
+        assert!(!from_corners_complex.hit(ray_should_not_hit, test_range.clone()));
+
+        let box0 = AxisAlignedBoundingBox::from_corners(DVec3::ZERO, DVec3::ONE);
+        let box1 = AxisAlignedBoundingBox::from_corners(DVec3::ONE, DVec3::splat(2.0));
+        let from_boxes = AxisAlignedBoundingBox::from_boxes(box0.clone(), box1);
+       
+        assert_eq!(from_boxes.x, 0.0..2.0);
+        assert_eq!(from_boxes.y, 0.0..2.0);
+        assert_eq!(from_boxes.z, 0.0..2.0);
+
+        assert!(from_boxes.hit(ray_should_hit, test_range.clone()));
+        assert!(!from_boxes.hit(ray_should_not_hit, test_range.clone()));
+        
+        let box2 = AxisAlignedBoundingBox::from_corners(DVec3::ZERO, DVec3::NEG_ONE);
+        let from_boxes_negative = AxisAlignedBoundingBox::from_boxes(box0, box2);
+        
+        assert_eq!(from_boxes_negative.x, -1.0..1.0);
+        assert_eq!(from_boxes_negative.y, -1.0..1.0);
+        assert_eq!(from_boxes_negative.z, -1.0..1.0);
     }
 }

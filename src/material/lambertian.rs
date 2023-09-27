@@ -4,6 +4,7 @@ use crate::{hittable::HitRecord, ray::Ray};
 
 use super::{util::random_unit_vector, Material, Scattered};
 
+#[derive(Debug)]
 pub struct Lambertian {
     albedo: DVec3,
 }

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use rust_tracer::{prelude::*, bounding_volume::BoundingVolumeHierarchyNode};
+use rust_tracer::{bounding_volume::BoundingVolumeHierarchyNode, prelude::*};
 
 fn main() {
     let material_ground = Arc::new(Lambertian::new(DVec3::new(0.8, 0.8, 0.0)));

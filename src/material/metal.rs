@@ -4,6 +4,7 @@ use crate::{hittable::HitRecord, ray::Ray};
 
 use super::{util::random_unit_vector, util::reflect, Material, Scattered};
 
+#[derive(Debug)]
 pub struct Metal {
     albedo: DVec3,
     fuzz: f64,

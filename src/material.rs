@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use glam::DVec3;
 
 use crate::{hittable::HitRecord, ray::Ray};
@@ -7,7 +9,7 @@ pub mod lambertian;
 pub mod metal;
 pub mod util;
 
-pub trait Material {
+pub trait Material: Send + Sync + Debug {
     fn scatter(&self, ray: Ray, hit_record: HitRecord) -> Option<Scattered>;
 }
 

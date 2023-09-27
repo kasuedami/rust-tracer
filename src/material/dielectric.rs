@@ -4,6 +4,7 @@ use crate::{hittable::HitRecord, material::util::refract, ray::Ray};
 
 use super::{util::reflect, Material, Scattered};
 
+#[derive(Debug)]
 pub struct Dielectric {
     refraction_index: f64,
 }

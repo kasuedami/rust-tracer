@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
 use rand::Rng;
-use rust_tracer::{material::util::random_unit_vector, prelude::*};
+use rust_tracer::{material::util::random_unit_vector, prelude::*, bounding_volume::BoundingVolumeHierarchyNode};
 
-pub fn create_world() -> HittableList {
+pub fn create_world() -> BoundingVolumeHierarchyNode {
     let material_ground = Arc::new(Lambertian::new(DVec3::new(0.5, 0.5, 0.5)));
     let material_dielectric = Arc::new(Dielectric::new(1.5));
     let material_lambertian = Arc::new(Lambertian::new(DVec3::new(0.4, 0.2, 0.1)));
@@ -68,10 +68,10 @@ pub fn create_world() -> HittableList {
         }
     }
 
-    HittableList::new(objects)
+    BoundingVolumeHierarchyNode::new(objects)
 }
 
-pub fn create_camera(world: &HittableList) {
+pub fn create_camera(world: &BoundingVolumeHierarchyNode) {
     let look_from = DVec3::new(13.0, 2.0, 3.0);
     let image = Image::from_width_aspect_ratio(400, 16.0 / 9.0, 255);
 
