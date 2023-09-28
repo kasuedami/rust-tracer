@@ -1,12 +1,19 @@
 use std::sync::Arc;
 
 use rand::Rng;
-use rust_tracer::{material::util::random_unit_vector, prelude::*, bounding_volume::BoundingVolumeHierarchyNode};
+use rust_tracer::{
+    bounding_volume::BoundingVolumeHierarchyNode, material::util::random_unit_vector, prelude::*,
+};
 
 pub fn create_world() -> BoundingVolumeHierarchyNode {
-    let material_ground = Arc::new(Lambertian::new(DVec3::new(0.5, 0.5, 0.5)));
+    let ground_texture = Texture::Checker(Checker::with_solid(
+        0.32,
+        DVec3::new(0.2, 0.3, 0.1),
+        DVec3::new(0.9, 0.9, 0.9),
+    ));
+    let material_ground = Arc::new(Lambertian::new(ground_texture));
     let material_dielectric = Arc::new(Dielectric::new(1.5));
-    let material_lambertian = Arc::new(Lambertian::new(DVec3::new(0.4, 0.2, 0.1)));
+    let material_lambertian = Arc::new(Lambertian::with_solid(DVec3::new(0.4, 0.2, 0.1)));
     let material_metal = Arc::new(Metal::new(DVec3::new(0.7, 0.6, 0.5), 0.0));
 
     let mut objects: Vec<Box<dyn Hittable>> = vec![
@@ -46,7 +53,7 @@ pub fn create_world() -> BoundingVolumeHierarchyNode {
                 let choose_material = rand_thread.gen_range(0.0..1.0);
 
                 let sphere = if choose_material < 0.8 {
-                    let material = Arc::new(Lambertian::new(random_unit_vector()));
+                    let material = Arc::new(Lambertian::with_solid(random_unit_vector()));
                     let direction = DVec3::new(0.0, rand_thread.gen_range(0.0..0.5), 0.0);
                     Box::new(Sphere::moving(position, direction, 0.2, material))
                 } else if choose_material < 0.95 {

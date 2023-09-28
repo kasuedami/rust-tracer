@@ -10,11 +10,7 @@ use itertools::Itertools;
 use rand::Rng;
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
-use crate::{
-    hittable::Hittable,
-    material::util::random_in_unit_disk,
-    ray::Ray,
-};
+use crate::{hittable::Hittable, material::util::random_in_unit_disk, ray::Ray};
 
 pub mod builder;
 

@@ -1,6 +1,6 @@
-use std::{cmp::Ordering, ops::Range, sync::Arc, fmt::Debug};
+use std::{cmp::Ordering, fmt::Debug, ops::Range, sync::Arc};
 
-use glam::DVec3;
+use glam::{DVec2, DVec3};
 
 use crate::{material::Material, ray::Ray};
 
@@ -15,6 +15,7 @@ pub struct HitRecord {
     pub point: DVec3,
     pub normal: DVec3,
     pub t: f64,
+    pub uv: DVec2,
     pub material: Arc<dyn Material>,
     pub front_face: bool,
 }
@@ -25,6 +26,7 @@ impl HitRecord {
         point: DVec3,
         outward_normal: DVec3,
         t: f64,
+        uv: DVec2,
         material: Arc<dyn Material>,
     ) -> Self {
         let front_face = ray.direction.dot(outward_normal) < 0.0;
@@ -38,6 +40,7 @@ impl HitRecord {
             point,
             normal,
             t,
+            uv,
             material,
             front_face,
         }
@@ -226,17 +229,17 @@ mod tests {
         let box0 = AxisAlignedBoundingBox::from_corners(DVec3::ZERO, DVec3::ONE);
         let box1 = AxisAlignedBoundingBox::from_corners(DVec3::ONE, DVec3::splat(2.0));
         let from_boxes = AxisAlignedBoundingBox::from_boxes(box0.clone(), box1);
-       
+
         assert_eq!(from_boxes.x, 0.0..2.0);
         assert_eq!(from_boxes.y, 0.0..2.0);
         assert_eq!(from_boxes.z, 0.0..2.0);
 
         assert!(from_boxes.hit(ray_should_hit, test_range.clone()));
         assert!(!from_boxes.hit(ray_should_not_hit, test_range.clone()));
-        
+
         let box2 = AxisAlignedBoundingBox::from_corners(DVec3::ZERO, DVec3::NEG_ONE);
         let from_boxes_negative = AxisAlignedBoundingBox::from_boxes(box0, box2);
-        
+
         assert_eq!(from_boxes_negative.x, -1.0..1.0);
         assert_eq!(from_boxes_negative.y, -1.0..1.0);
         assert_eq!(from_boxes_negative.z, -1.0..1.0);

@@ -1,12 +1,12 @@
 use std::{f64::consts::PI, sync::Arc};
 
-use rust_tracer::{prelude::*, bounding_volume::BoundingVolumeHierarchyNode};
+use rust_tracer::{bounding_volume::BoundingVolumeHierarchyNode, prelude::*};
 
 fn main() {
     let r = (PI / 4.0).cos();
 
-    let material_left = Arc::new(Lambertian::new(DVec3::new(0.0, 0.0, 1.0)));
-    let material_right = Arc::new(Lambertian::new(DVec3::new(1.0, 0.0, 0.0)));
+    let material_left = Arc::new(Lambertian::with_solid(DVec3::new(0.0, 0.0, 1.0)));
+    let material_right = Arc::new(Lambertian::with_solid(DVec3::new(1.0, 0.0, 0.0)));
 
     let objects: Vec<Box<dyn Hittable>> = vec![
         Box::new(Sphere::stationary(

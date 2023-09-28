@@ -117,16 +117,11 @@ impl Hittable for BoundingVolumeHierarchyNode {
                 } else {
                     Some(left)
                 }
-            },
-            (Some(right), None) => {
-                Some(right)
-            },
-            (None, Some(left)) => {
-                Some(left)
-            },
-            _ => None
+            }
+            (Some(right), None) => Some(right),
+            (None, Some(left)) => Some(left),
+            _ => None,
         }
-
     }
 
     fn bounding_box(&self) -> &AxisAlignedBoundingBox {

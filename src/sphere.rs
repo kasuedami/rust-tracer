@@ -5,7 +5,7 @@ use crate::{
     material::Material,
     ray::Ray,
 };
-use glam::DVec3;
+use glam::{DVec2, DVec3};
 
 #[derive(Debug)]
 pub struct Sphere {
@@ -102,6 +102,7 @@ impl Hittable for Sphere {
             point,
             outward_normal,
             root,
+            DVec2::ZERO,
             self.material.clone(),
         ))
     }

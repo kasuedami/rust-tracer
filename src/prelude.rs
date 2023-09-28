@@ -5,6 +5,7 @@ pub use crate::{
     hittable::HittableList,
     material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal},
     sphere::Sphere,
+    texture::{Checker, Texture},
 };
 
-pub use glam::DVec3;
+pub use glam::{DVec2, DVec3};
