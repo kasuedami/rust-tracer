@@ -1,4 +1,4 @@
-use std::{ops::Range, sync::Arc};
+use std::{ops::Range, sync::Arc, f64::consts::PI};
 
 use crate::{
     hittable::{AxisAlignedBoundingBox, HitRecord, Hittable},
@@ -62,6 +62,13 @@ impl Sphere {
     fn current_position(&self, time: f64) -> DVec3 {
         self.start_position + self.direction * time
     }
+
+    fn get_uv(&self, point: DVec3) -> DVec2 {
+        let theta = (-point.y).acos();
+        let phi = (-point.z).atan2(point.x) + PI;
+
+        DVec2::new(phi / (2.0 * PI), theta / PI)
+    }
 }
 
 impl Hittable for Sphere {
@@ -102,7 +109,7 @@ impl Hittable for Sphere {
             point,
             outward_normal,
             root,
-            DVec2::ZERO,
+            self.get_uv(outward_normal),
             self.material.clone(),
         ))
     }
