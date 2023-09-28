@@ -6,6 +6,7 @@ pub use crate::{
     material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal},
     sphere::Sphere,
     texture::{Checker, Texture},
+    bounding_volume::BoundingVolumeHierarchyNode,
 };
 
 pub use glam::{DVec2, DVec3};

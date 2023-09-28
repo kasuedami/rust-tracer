@@ -37,9 +37,9 @@ impl Checker {
 
     fn sample(&self, uv: DVec2, position: DVec3) -> DVec3 {
         let scale_inverse = self.scale.recip();
-        let x = (position.x * scale_inverse) as i64;
-        let y = (position.y * scale_inverse) as i64;
-        let z = (position.z * scale_inverse) as i64;
+        let x = (position.x * scale_inverse).floor() as i64;
+        let y = (position.y * scale_inverse).floor() as i64;
+        let z = (position.z * scale_inverse).floor() as i64;
 
         let is_even = (x + y + z) % 2 == 0;
 
