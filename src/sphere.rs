@@ -1,4 +1,4 @@
-use std::{ops::Range, sync::Arc, f64::consts::PI};
+use std::{f64::consts::PI, ops::Range, sync::Arc};
 
 use crate::{
     hittable::{AxisAlignedBoundingBox, HitRecord, Hittable},

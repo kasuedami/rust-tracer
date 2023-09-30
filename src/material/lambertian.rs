@@ -1,6 +1,6 @@
 use glam::DVec3;
 
-use crate::{hittable::HitRecord, prelude::Texture, ray::Ray};
+use crate::{hittable::HitRecord, prelude::Texture, ray::Ray, texture::Sample};
 
 use super::{util::random_unit_vector, Material, Scattered};
 
