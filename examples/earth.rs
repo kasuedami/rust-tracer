@@ -5,7 +5,6 @@ use rust_tracer::prelude::*;
 fn main() {
     let earth_texture_path = Path::new("assets/earthmap.jpg");
     let earth_texture = Texture::Image(TextureImage::from_file(earth_texture_path));
-    // let earth_material = Arc::new(Lambertian::with_solid(DVec3::X));
     let earth_material = Arc::new(Lambertian::new(earth_texture));
     let earth_sphere = Sphere::stationary(DVec3::ZERO, 2.0, earth_material);
 
