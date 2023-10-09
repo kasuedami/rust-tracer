@@ -130,11 +130,28 @@ impl PerlinNoise {
     }
 
     pub fn noise(&self, position: DVec3) -> f64 {
-        let x = ((4.0 * position.x) as i64 & 255) as usize;
-        let y = ((4.0 * position.y) as i64 & 255) as usize;
-        let z = ((4.0 * position.z) as i64 & 255) as usize;
-        
-        self.random_numbers[(self.permute_x[x] ^ self.permute_y[y] ^ self.permute_z[z]) as usize]
+        let x = position.x - position.x.floor();
+        let y = position.y - position.y.floor();
+        let z = position.z - position.z.floor();
+
+        let i = position.x.floor() as i64;
+        let j = position.y.floor() as i64;
+        let k = position.z.floor() as i64;
+
+        let mut c: [[[f64; 2]; 2]; 2] = [[[0.0; 2]; 2]; 2];
+
+        for di in 0..2 {
+            for dj in 0..2 {
+                for dk in 0..2 {
+                    let index = self.permute_x[((i + di as i64) & 255) as usize] ^
+                        self.permute_y[((j + dj as i64) & 255) as usize] ^
+                        self.permute_z[((k+ dk as i64) & 255) as usize];
+                    c[di][dj][dk] = self.random_numbers[index as usize];
+                }
+            }
+        }
+
+        Self::trilinear_interpolation(&c, x, y, z)
     }
 
     fn generate_permute() -> Vec<i32> {
@@ -152,5 +169,22 @@ impl PerlinNoise {
             elements[i] = elements[target];
             elements[target] = tmp;
         }
+    }
+
+    fn trilinear_interpolation(c: &[[[f64; 2]; 2]; 2], x: f64, y: f64, z: f64) -> f64 {
+        let mut accummulation = 0.0;
+
+        for i in 0..2 {
+            for j in 0..2 {
+                for k in 0..2 {
+                    accummulation += (i as f64 * x + (1.0 - i as f64) * (1.0 - x)) *
+                        (j as f64 * y + (1.0 - j as f64) * (1.0 - y)) *
+                        (k as f64 * z + (1.0 - k as f64) * (1.0 - z)) *
+                        c[i][j][k];
+                }
+            }
+        }
+
+        accummulation
     }
 }
