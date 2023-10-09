@@ -93,19 +93,25 @@ impl Sample for TextureImage {
 #[derive(Debug)]
 pub struct PerlinTexture {
     perlin: PerlinNoise,
+    scale: f64,
 }
 
 impl PerlinTexture {
     pub fn new() -> Self {
+        Self::new_scaled(1.0)
+    }
+
+    pub fn new_scaled(scale: f64) -> Self {
         Self {
             perlin: PerlinNoise::new(),
+            scale: scale,
         }
     }
 }
 
 impl Sample for PerlinTexture {
     fn sample(&self, _uv: DVec2, position: DVec3) -> DVec3 {
-        DVec3::splat(self.perlin.noise(position))
+        DVec3::splat(self.perlin.noise(position * self.scale))
     }
 }
 

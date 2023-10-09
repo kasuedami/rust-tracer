@@ -3,7 +3,7 @@ use std::sync::Arc;
 use rust_tracer::prelude::*;
 
 fn main() {
-    let perlin_material = Arc::new(Lambertian::new(Texture::Perlin(PerlinTexture::new())));
+    let perlin_material = Arc::new(Lambertian::new(Texture::Perlin(PerlinTexture::new_scaled(4.0))));
     let sphere0 = Box::new(Sphere::stationary(
         DVec3::new(0.0, -1000.0, 0.0),
         1000.0,
