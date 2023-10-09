@@ -134,6 +134,10 @@ impl PerlinNoise {
         let y = position.y - position.y.floor();
         let z = position.z - position.z.floor();
 
+        let x = x * x * (3.0 - 2.0 * x);
+        let y = y * y * (3.0 - 2.0 * y);
+        let z = z * z * (3.0 - 2.0 * z);
+
         let i = position.x.floor() as i64;
         let j = position.y.floor() as i64;
         let k = position.z.floor() as i64;
@@ -145,7 +149,7 @@ impl PerlinNoise {
                 for dk in 0..2 {
                     let index = self.permute_x[((i + di as i64) & 255) as usize] ^
                         self.permute_y[((j + dj as i64) & 255) as usize] ^
-                        self.permute_z[((k+ dk as i64) & 255) as usize];
+                        self.permute_z[((k + dk as i64) & 255) as usize];
                     c[di][dj][dk] = self.random_numbers[index as usize];
                 }
             }
