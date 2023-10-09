@@ -111,13 +111,13 @@ impl PerlinTexture {
 
 impl Sample for PerlinTexture {
     fn sample(&self, _uv: DVec2, position: DVec3) -> DVec3 {
-        DVec3::splat(self.perlin.noise(position * self.scale))
+        DVec3::splat(0.5) * (1.0 + DVec3::splat(self.perlin.noise(position * self.scale)))
     }
 }
 
 #[derive(Debug)]
 struct PerlinNoise {
-    random_numbers: Vec<f64>,
+    random_vectors: Vec<DVec3>,
     permute_x: Vec<i32>,
     permute_y: Vec<i32>,
     permute_z: Vec<i32>,
@@ -126,13 +126,15 @@ struct PerlinNoise {
 impl PerlinNoise {
     pub fn new() -> Self {
         let mut rand_thread = rand::thread_rng();
-        let random_numbers = (0..256).into_iter().map(|_| rand_thread.gen_range(0.0..1.0)).collect();
+        let random_vectors = (0..256).into_iter().map(|_| {
+            DVec3::new(rand_thread.gen_range(-1.0..1.0), rand_thread.gen_range(-1.0..1.0), rand_thread.gen_range(-1.0..1.0))   
+        }).collect();
 
         let permute_x = Self::generate_permute();
         let permute_y = Self::generate_permute();
         let permute_z = Self::generate_permute();
 
-        Self { random_numbers, permute_x, permute_y, permute_z }
+        Self { random_vectors, permute_x, permute_y, permute_z }
     }
 
     pub fn noise(&self, position: DVec3) -> f64 {
@@ -148,7 +150,7 @@ impl PerlinNoise {
         let j = position.y.floor() as i64;
         let k = position.z.floor() as i64;
 
-        let mut c: [[[f64; 2]; 2]; 2] = [[[0.0; 2]; 2]; 2];
+        let mut c: [[[DVec3; 2]; 2]; 2] = [[[DVec3::ZERO; 2]; 2]; 2];
 
         for di in 0..2 {
             for dj in 0..2 {
@@ -156,7 +158,7 @@ impl PerlinNoise {
                     let index = self.permute_x[((i + di as i64) & 255) as usize] ^
                         self.permute_y[((j + dj as i64) & 255) as usize] ^
                         self.permute_z[((k + dk as i64) & 255) as usize];
-                    c[di][dj][dk] = self.random_numbers[index as usize];
+                    c[di][dj][dk] = self.random_vectors[index as usize];
                 }
             }
         }
@@ -181,16 +183,21 @@ impl PerlinNoise {
         }
     }
 
-    fn trilinear_interpolation(c: &[[[f64; 2]; 2]; 2], x: f64, y: f64, z: f64) -> f64 {
+    fn trilinear_interpolation(c: &[[[DVec3; 2]; 2]; 2], x: f64, y: f64, z: f64) -> f64 {
         let mut accummulation = 0.0;
+
+        let xx = x * x *(3.0 - 2.0 * x);
+        let yy = y * y *(3.0 - 2.0 * y);
+        let zz = z * z *(3.0 - 2.0 * z);
 
         for i in 0..2 {
             for j in 0..2 {
                 for k in 0..2 {
-                    accummulation += (i as f64 * x + (1.0 - i as f64) * (1.0 - x)) *
-                        (j as f64 * y + (1.0 - j as f64) * (1.0 - y)) *
-                        (k as f64 * z + (1.0 - k as f64) * (1.0 - z)) *
-                        c[i][j][k];
+                    let weight = DVec3::new(x - i as f64, y - j as f64, z - k as f64);
+                    accummulation += (i as f64 * xx + (1.0 - i as f64) * (1.0 - x)) *
+                        (j as f64 * yy + (1.0 - j as f64) * (1.0 - y)) *
+                        (k as f64 * zz + (1.0 - k as f64) * (1.0 - z)) *
+                        c[i][j][k].dot(weight);
                 }
             }
         }
